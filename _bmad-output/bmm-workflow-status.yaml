@@ -1,0 +1,27 @@
+# Workflow Status - sunny-2
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+generated: "2025-12-24T17:15:00.000Z"
+project: "sunny-2"
+project_type: "Software Development"
+selected_track: "method"
+field_type: "greenfield"
+workflow_path: "_bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml"
+
+workflow_status:
+  brainstorm-project: "_bmad-output/analysis/brainstorming-session-2025-12-24.md"
+  research: "_bmad-output/project-planning-artifacts/research/technical-solar-mvp-research-2025-12-24.md"
+  product-brief: "_bmad-output/project-planning-artifacts/product-brief-sunny-2-2025-12-24.md"
+  prd: "_bmad-output/prd.md"
+  create-ux-design: "conditional"
+  create-architecture: "_bmad-output/architecture.md"
+  fundamentos-stack: "_bmad-output/fundamentos-stack.md"
+  sprint-planning: "_bmad-output/sprint-backlog.md"
+  create-epics-and-stories: "required"
+  test-design: "recommended"
+  validate-architecture: "optional"
+  implementation-readiness: "required"
+  sprint-planning: "required"
+

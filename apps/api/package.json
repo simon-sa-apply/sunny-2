@@ -1,0 +1,13 @@
+{
+  "name": "@sunny-2/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/bin/uvicorn app.main:app --reload --port 8000",
+    "build": "echo 'Python API - no build step required'",
+    "lint": ".venv/bin/ruff check app tests",
+    "test": ".venv/bin/pytest",
+    "start": ".venv/bin/uvicorn app.main:app --port 8000"
+  }
+}
+

@@ -36,9 +36,9 @@ export function ImpactCard({
       label: t("equivalences.phones"),
     },
     {
-      icon: "💡",
-      value: Math.round(annualKwh / 10 / 365),
-      label: t("equivalences.bulbs"),
+      icon: "🎬",
+      value: Math.round(annualKwh / 1.2), // 8h Netflix en TV grande = ~1.2 kWh
+      label: t("equivalences.netflix"),
     },
   ];
 

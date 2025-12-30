@@ -91,10 +91,10 @@
     "co2": "kg CO₂ evitados",
     "savings": "Ahorro/año",
     "equivalences": {
-      "cars": "autos menos en la calle",
+      "cars": "autos menos",
       "trees": "árboles plantados",
-      "phones": "cargas de smartphone",
-      "bulbs": "horas de luz LED"
+      "phones": "cargas de celular",
+      "netflix": "maratones de Netflix"
     },
     "timeline": {
       "title": "En 10 años",

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Solar Generation Estimator API - Powered by Copernicus and Gemini 2.0"
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
+license = { text = "BSL-1.1" }
 authors = [
     { name = "sunny-2 Team" }
 ]

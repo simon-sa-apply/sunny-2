@@ -15,7 +15,7 @@ from app.core.config import settings
 from slowapi.errors import RateLimitExceeded
 
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
-from app.routers import health, estimate, progress, geosearch, api_keys
+from app.routers import health, estimate, progress, geosearch, api_keys, analyses, cron
 
 
 @asynccontextmanager
@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler for startup/shutdown events."""
     from app.core.database import db
     from app.core.cache import cache
+    from app.services.ai_consultant import ai_consultant
     
     # Startup
     print(f"🌞 Starting sunny-2 API v{settings.VERSION}")
@@ -41,6 +42,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         print("📦 Redis cache initialized")
     else:
         print("⚠️ Redis not configured (set UPSTASH_REDIS_REST_URL)")
+    
+    # Initialize AI consultant (Gemini)
+    if ai_consultant.is_configured:
+        ai_consultant.init()
+        print("🤖 AI Consultant (Gemini 2.0) initialized")
+    else:
+        print("⚠️ AI Consultant not configured (set GEMINI_API_KEY)")
     
     yield
     
@@ -98,6 +106,8 @@ app.include_router(estimate.router)
 app.include_router(progress.router)
 app.include_router(geosearch.router)
 app.include_router(api_keys.router)
+app.include_router(analyses.router)
+app.include_router(cron.router)
 
 
 @app.get("/", include_in_schema=False)

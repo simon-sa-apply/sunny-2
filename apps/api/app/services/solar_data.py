@@ -238,7 +238,10 @@ class SolarDataService:
         year: Optional[int] = None,
     ) -> UnifiedSolarData:
         """
-        Fetch solar radiation data with automatic source selection.
+        Fetch solar radiation data with parallel API calls for speed.
+        
+        OPTIMIZED: Calls CAMS and PVGIS in parallel, uses first successful response.
+        This reduces latency from sequential (CAMS_time + PVGIS_time) to max(CAMS_time, PVGIS_time).
         
         Args:
             lat: Latitude (-90 to 90)
@@ -246,22 +249,107 @@ class SolarDataService:
             year: Year to fetch (defaults to previous year)
         
         Returns:
-            UnifiedSolarData from the best available source
+            UnifiedSolarData from the fastest available source
         """
         if year is None:
             year = datetime.now().year - 1
         
-        # Determine optimal strategy based on location
-        try_cams_first = self._is_likely_cams_coverage(lat, lon)
+        # OPTIMIZATION: Parallel fetch with first-wins strategy
+        return await self._fetch_parallel(lat, lon, year)
+    
+    async def _fetch_parallel(
+        self,
+        lat: float,
+        lon: float,
+        year: int,
+    ) -> UnifiedSolarData:
+        """
+        Fetch from CAMS and PVGIS in parallel, return first successful result.
         
-        if try_cams_first:
-            # Strategy 1: CAMS first, PVGIS fallback
-            result = await self._try_cams_then_pvgis(lat, lon, year)
-        else:
-            # Strategy 2: PVGIS first (skip CAMS for known out-of-coverage)
-            result = await self._try_pvgis_then_cams(lat, lon, year)
+        Uses asyncio.wait with FIRST_COMPLETED to minimize latency.
+        """
+        import asyncio
         
-        return result
+        # Create tasks for both sources
+        cams_task = asyncio.create_task(
+            self._safe_fetch_cams(lat, lon, year),
+            name="cams"
+        )
+        pvgis_task = asyncio.create_task(
+            self._safe_fetch_pvgis(lat, lon, year),
+            name="pvgis"
+        )
+        
+        pending = {cams_task, pvgis_task}
+        result = None
+        errors = []
+        
+        while pending:
+            done, pending = await asyncio.wait(
+                pending,
+                return_when=asyncio.FIRST_COMPLETED,
+                timeout=35.0,  # Max wait time
+            )
+            
+            for task in done:
+                try:
+                    data = task.result()
+                    if data is not None:
+                        # Got valid data - cancel remaining tasks
+                        source = "CAMS" if task.get_name() == "cams" else "PVGIS"
+                        logger.info(f"✅ {source} responded first for ({lat}, {lon})")
+                        
+                        for t in pending:
+                            t.cancel()
+                        
+                        return data
+                except Exception as e:
+                    errors.append(f"{task.get_name()}: {e}")
+                    logger.warning(f"Task {task.get_name()} failed: {e}")
+            
+            # Timeout reached with no result
+            if not done and pending:
+                logger.warning(f"Timeout waiting for solar data ({lat}, {lon})")
+                for t in pending:
+                    t.cancel()
+                break
+        
+        # All sources failed - use mock data
+        if errors:
+            logger.error(f"All sources failed for ({lat}, {lon}): {errors}")
+        
+        return self._generate_mock_data(lat, lon, year)
+    
+    async def _safe_fetch_cams(
+        self,
+        lat: float,
+        lon: float,
+        year: int,
+    ) -> Optional[UnifiedSolarData]:
+        """Safely fetch from CAMS, return None on error."""
+        try:
+            cams_data = await self.cams.fetch_solar_radiation(lat, lon, year)
+            # Only accept real CAMS data, not mock
+            if "Real Data" in cams_data.source:
+                return self._from_cams(cams_data)
+            return None  # Mock data - let PVGIS win
+        except Exception as e:
+            logger.debug(f"CAMS fetch error: {e}")
+            return None
+    
+    async def _safe_fetch_pvgis(
+        self,
+        lat: float,
+        lon: float,
+        year: int,
+    ) -> Optional[UnifiedSolarData]:
+        """Safely fetch from PVGIS, return None on error."""
+        try:
+            pvgis_data = await self.pvgis.fetch_solar_radiation(lat, lon, year)
+            return self._from_pvgis(pvgis_data)
+        except Exception as e:
+            logger.debug(f"PVGIS fetch error: {e}")
+            return None
 
     async def _try_cams_then_pvgis(
         self, lat: float, lon: float, year: int

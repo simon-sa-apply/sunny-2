@@ -97,7 +97,12 @@ class PVGISService:
         """Get or create HTTP client."""
         if self._client is None:
             self._client = httpx.AsyncClient(
-                timeout=httpx.Timeout(60.0),
+                timeout=httpx.Timeout(
+                    connect=5.0,      # Connection timeout
+                    read=25.0,        # Read timeout (reduced from 60s)
+                    write=10.0,       # Write timeout
+                    pool=5.0,         # Pool timeout
+                ),
                 headers={"Accept": "application/json"},
             )
         return self._client

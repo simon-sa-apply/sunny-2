@@ -5,4 +5,7 @@ export { SolarClock } from "./SolarClock";
 export { AIInsights } from "./AIInsights";
 export { ProgressBar } from "./ProgressBar";
 export { Dashboard } from "./Dashboard";
-
+export { Hero } from "./Hero";
+export { LocationSearch } from "./LocationSearch";
+export { RoofPresets } from "./RoofPresets";
+export { ImpactCard } from "./ImpactCard";

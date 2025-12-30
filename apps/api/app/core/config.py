@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     MAX_CONCURRENT_COPERNICUS: int = 5    # Parallel requests to Copernicus
     MAX_CONCURRENT_PVGIS: int = 10        # Parallel requests to PVGIS
     MAX_CONCURRENT_DB: int = 20           # Parallel database queries
+    
+    # ===========================================
+    # Cron Job Configuration
+    # ===========================================
+    CRON_SECRET: str = ""                 # Secret for authenticating cron jobs
 
 
 settings = Settings()

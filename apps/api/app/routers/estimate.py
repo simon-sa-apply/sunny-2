@@ -11,6 +11,7 @@ from app.plugins.base import get_plugin_for_location
 from app.schemas.estimate import EstimateRequest, EstimateResponse, LocationInfo, OptimizationInfo, SavingsInfo
 from app.services.cache_manager import get_or_create_model
 from app.services.copernicus import copernicus_service
+from app.services.ai_consultant import ai_consultant
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,31 @@ async def create_estimate(
             )
             savings = SavingsInfo(**savings_data)
         
-        # 6. Build response
+        # 6. Generate AI insights (optional - skip for faster response)
+        ai_insights = None
+        if request.include_ai_insights:
+            try:
+                calculation_data = {
+                    **result,
+                    "data_tier": data_tier,
+                    "location": {
+                        "lat": request.lat,
+                        "lon": request.lon,
+                        "country_code": country_code if country_code != "GLOBAL" else None,
+                    },
+                }
+                ai_insights = await ai_consultant.generate_narrative(
+                    calculation_data=calculation_data,
+                    country_plugin=plugin.constants.regulatory_reference,
+                )
+                logger.info(f"Generated AI insights for {request_id}")
+            except Exception as e:
+                logger.warning(f"Failed to generate AI insights for {request_id}: {e}")
+                # Continue without AI insights - they're optional
+        else:
+            logger.info(f"Skipping AI insights for {request_id} (fast mode)")
+        
+        # 7. Build response
         response_data = EstimateResponse(
             annual_generation_kwh=result["annual_generation_kwh"],
             monthly_breakdown=result["monthly_breakdown"],
@@ -112,6 +137,7 @@ async def create_estimate(
             ),
             savings=savings,
             applied_plugin=plugin.constants.regulatory_reference,
+            ai_insights=ai_insights,
             request_id=request_id,
         )
         

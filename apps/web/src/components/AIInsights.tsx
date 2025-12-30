@@ -1,11 +1,19 @@
 "use client";
 
+interface LocationInsight {
+  title: string;
+  content: string;
+  source: string;
+}
+
 interface AIInsightsProps {
   insights?: {
     summary?: string;
     seasonal_analysis?: string;
+    location_insights?: LocationInsight[];
     recommendations?: string;
     confidence_note?: string;
+    citations?: string[];
   };
   dataTier: string;
   confidenceScore: number;
@@ -15,6 +23,31 @@ interface AIInsightsProps {
     currency_symbol: string;
     co2_savings_kg: number;
   };
+}
+
+// Icons for different insight types
+const insightIcons: Record<string, string> = {
+  precipitación: "🌧️",
+  lluvia: "🌧️",
+  clima: "🌤️",
+  climático: "🌤️",
+  temperatura: "🌡️",
+  sol: "☀️",
+  solar: "☀️",
+  radiación: "📡",
+  latitud: "🌍",
+  recurso: "⚡",
+  energético: "🔋",
+  geográfico: "🗺️",
+  default: "📊",
+};
+
+function getInsightIcon(title: string): string {
+  const lowerTitle = title.toLowerCase();
+  for (const [key, icon] of Object.entries(insightIcons)) {
+    if (lowerTitle.includes(key)) return icon;
+  }
+  return insightIcons.default;
 }
 
 export function AIInsights({
@@ -32,6 +65,7 @@ export function AIInsights({
       "La generación solar varía según la estación del año. Los meses de verano presentan mayor radiación.",
     recommendations:
       "Mantén los paneles limpios y revisa periódicamente la orientación para maximizar la captación.",
+    location_insights: [],
   };
 
   return (
@@ -73,6 +107,41 @@ export function AIInsights({
           <p className="text-gray-700 dark:text-gray-300">
             {displayInsights.seasonal_analysis}
           </p>
+        </div>
+      )}
+
+      {/* Location Insights - NEW ENRICHED DATA */}
+      {displayInsights.location_insights && displayInsights.location_insights.length > 0 && (
+        <div className="mb-6 space-y-4">
+          <h4 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <span className="text-xl">🌍</span>
+            Datos Climáticos y Geográficos de tu Ubicación
+          </h4>
+          <div className="grid md:grid-cols-2 gap-4">
+            {displayInsights.location_insights.map((insight, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl flex-shrink-0">
+                    {getInsightIcon(insight.title)}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-2">
+                      {insight.title}
+                    </h5>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                      {insight.content}
+                    </p>
+                    <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400 italic">
+                      📚 {insight.source}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -132,7 +201,11 @@ export function AIInsights({
       {/* Data Sources */}
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p className="text-xs text-gray-500">
-          Fuentes: ERA5-Land (ECMWF), CAMS Solar Radiation (ESA/Copernicus)
+          {displayInsights.citations && displayInsights.citations.length > 0 ? (
+            <>Fuentes: {displayInsights.citations.join(", ")}</>
+          ) : (
+            <>Fuentes: ERA5-Land (ECMWF), CAMS Solar Radiation (ESA/Copernicus), PVGIS TMY (JRC)</>
+          )}
         </p>
       </div>
     </div>

@@ -32,6 +32,10 @@ class EstimateRequest(BaseModel):
         gt=0,
         description="Local electricity price per kWh (for savings calculation)",
     )
+    include_ai_insights: bool = Field(
+        default=True,
+        description="Include AI-generated insights (adds ~5s latency). Set to false for faster response.",
+    )
 
     model_config = {
         "json_schema_extra": {

@@ -82,25 +82,25 @@ export function SolarClock({
       : "text-red-600";
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg h-full flex flex-col w-full">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg h-full flex flex-col w-full">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-4 md:mb-6">
         ☀️ {t("title")}
       </h3>
 
       {/* Annual KWH Display */}
-      <div className="text-center mb-6">
-        <span className="text-4xl font-bold text-gray-900 dark:text-white">
+      <div className="text-center mb-4 md:mb-6">
+        <span className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white">
           {result.annual_kwh.toLocaleString()}
         </span>
-        <span className="text-lg text-gray-500 ml-2">kWh/year</span>
-        <div className={`text-sm mt-1 ${efficiencyColor}`}>
+        <span className="text-sm md:text-lg text-gray-500 ml-1 md:ml-2">kWh/year</span>
+        <div className={`text-xs md:text-sm mt-1 ${efficiencyColor}`}>
           {(result.efficiency * 100).toFixed(0)}% {t("efficiency")}
         </div>
       </div>
 
       {/* Tilt Slider */}
-      <div className="mb-6">
-        <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <div className="mb-4 md:mb-6">
+        <label className="flex items-center justify-between text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           <span>{t("tilt")}</span>
           <span className="font-mono text-solar-600">{tilt}°</span>
         </label>
@@ -111,25 +111,25 @@ export function SolarClock({
           step={5}
           value={tilt}
           onChange={(e) => setTilt(Number(e.target.value))}
-          className="w-full h-3 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-solar-500"
+          className="w-full h-2 md:h-3 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-solar-500"
         />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>Horizontal</span>
-          <span>Vertical</span>
+        <div className="flex justify-between text-[10px] md:text-xs text-gray-500 mt-1">
+          <span>0°</span>
+          <span>90°</span>
         </div>
       </div>
 
       {/* Orientation Compass */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:mb-3">
           {t("orientation")}
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-1.5 md:gap-2">
           {Object.entries(ORIENTATION_LABELS).map(([deg, label]) => (
             <button
               key={deg}
               onClick={() => setOrientation(Number(deg))}
-              className={`p-3 rounded-lg border text-sm font-medium transition-all
+              className={`p-2 md:p-3 rounded-lg border text-xs md:text-sm font-medium transition-all
                 ${
                   orientation === Number(deg)
                     ? "bg-solar-500 text-white border-solar-500 scale-105"
@@ -144,10 +144,9 @@ export function SolarClock({
 
       {/* Optimal indicator */}
       {interpolationModel && (
-        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <p className="text-sm text-green-700 dark:text-green-400">
-            💡 {t("optimal")}: {interpolationModel.optimal_tilt}° {t("tilt").toLowerCase()},{" "}
-            {ORIENTATION_LABELS[interpolationModel.optimal_orientation] || "N"} {t("orientationLabel")}
+        <div className="mt-3 md:mt-4 p-2 md:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <p className="text-xs md:text-sm text-green-700 dark:text-green-400">
+            💡 {interpolationModel.optimal_tilt}° / {ORIENTATION_LABELS[interpolationModel.optimal_orientation] || "N"}
           </p>
         </div>
       )}

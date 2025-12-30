@@ -207,12 +207,12 @@ export function Dashboard() {
               </div>
             </header>
 
-            <main className="container mx-auto px-4 py-12">
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
               {/* Step 1: Location Search */}
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="max-w-2xl mx-auto mb-12"
+                className="max-w-2xl mx-auto mb-8 md:mb-12"
               >
                 <div className="text-center mb-8">
                   <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
@@ -264,9 +264,9 @@ export function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="max-w-4xl mx-auto"
+                    className="w-full"
                   >
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-slate-200 dark:border-slate-700">
                       <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
                         <span className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600">
                           ☀️
@@ -301,7 +301,7 @@ export function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="max-w-xl mx-auto mt-8"
+                    className="max-w-2xl mx-auto mt-6 md:mt-8"
                   >
                     <ProgressBar percent={progress.percent} message={progress.message} />
                   </motion.div>
@@ -315,7 +315,7 @@ export function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="max-w-xl mx-auto mt-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6"
+                    className="max-w-2xl mx-auto mt-6 md:mt-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 sm:p-6"
                   >
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-800 flex items-center justify-center text-red-600 dark:text-red-300">
@@ -339,10 +339,10 @@ export function Dashboard() {
                     id="results"
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-16 space-y-8"
+                    className="mt-10 md:mt-16 space-y-6 md:space-y-8"
                   >
                     {/* Main Result Header */}
-                    <div className="text-center">
+                    <div className="text-center px-4">
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -363,12 +363,12 @@ export function Dashboard() {
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="grid md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white"
+                        className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl md:rounded-2xl p-4 md:p-6 text-white"
                       >
                         <div className="text-sm opacity-80">{tResults("cards.annual")}</div>
                         <div className="text-3xl font-bold mt-1">
@@ -381,10 +381,10 @@ export function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
+                        className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">{tResults("cards.peak")}</div>
-                        <div className="text-3xl font-bold text-emerald-600 mt-1">
+                        <div className="text-xs md:text-sm text-slate-500">{tResults("cards.peak")}</div>
+                        <div className="text-2xl md:text-3xl font-bold text-emerald-600 mt-1">
                           {result.peak_month.month}
                         </div>
                         <div className="text-sm text-slate-500">
@@ -396,10 +396,10 @@ export function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
+                        className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">{tResults("cards.worst")}</div>
-                        <div className="text-3xl font-bold text-blue-600 mt-1">
+                        <div className="text-xs md:text-sm text-slate-500">{tResults("cards.worst")}</div>
+                        <div className="text-2xl md:text-3xl font-bold text-blue-600 mt-1">
                           {result.worst_month.month}
                         </div>
                         <div className="text-sm text-slate-500">
@@ -411,10 +411,10 @@ export function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
+                        className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">{tResults("cards.efficiency")}</div>
-                        <div className="text-3xl font-bold text-purple-600 mt-1">
+                        <div className="text-xs md:text-sm text-slate-500">{tResults("cards.efficiency")}</div>
+                        <div className="text-2xl md:text-3xl font-bold text-purple-600 mt-1">
                           {(result.optimization.efficiency_vs_optimal * 100).toFixed(0)}%
                         </div>
                         <div className="text-sm text-slate-500">{tResults("cards.ofOptimal")}</div>
@@ -422,7 +422,7 @@ export function Dashboard() {
                     </div>
 
                     {/* Charts Row: Monthly Chart (2/3) + Solar Clock (1/3) */}
-                    <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
                       <div className="lg:col-span-2 h-full">
                         <MonthlyChart data={result.monthly_breakdown} />
                       </div>
@@ -447,7 +447,7 @@ export function Dashboard() {
 
                     {/* Impact Card - Full Width */}
                     {result.savings && (
-                      <div className="max-w-6xl mx-auto">
+                      <div>
                         <ImpactCard
                           annualKwh={result.annual_generation_kwh}
                           co2SavedKg={result.savings.co2_savings_kg}
@@ -458,7 +458,7 @@ export function Dashboard() {
                     )}
 
                     {/* AI Insights - Full Width */}
-                    <div className="max-w-6xl mx-auto">
+                    <div>
                       <AIInsights
                         insights={result.ai_insights}
                         dataTier={result.data_tier}

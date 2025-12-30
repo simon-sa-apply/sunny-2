@@ -31,12 +31,12 @@ export function MonthlyChart({ data, animate = true }: MonthlyChartProps) {
   const avgKwh = Object.values(data).reduce((a, b) => a + b, 0) / 12;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg h-full flex flex-col">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg h-full flex flex-col">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4">
         {t("title")}
       </h3>
 
-      <div className="flex-1 min-h-[280px]">
+      <div className="flex-1 min-h-[220px] md:min-h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
@@ -104,23 +104,23 @@ export function MonthlyChart({ data, animate = true }: MonthlyChartProps) {
       </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-between mt-4 text-sm">
+      <div className="flex justify-between mt-3 md:mt-4 text-xs md:text-sm">
         <div className="text-center">
           <p className="text-gray-500 dark:text-gray-400">{t("min")}</p>
           <p className="font-mono font-semibold text-blue-600">
-            {minKwh.toLocaleString()} kWh
+            {minKwh.toLocaleString()}
           </p>
         </div>
         <div className="text-center">
           <p className="text-gray-500 dark:text-gray-400">{t("average")}</p>
           <p className="font-mono font-semibold text-gray-600 dark:text-gray-300">
-            {Math.round(avgKwh).toLocaleString()} kWh
+            {Math.round(avgKwh).toLocaleString()}
           </p>
         </div>
         <div className="text-center">
           <p className="text-gray-500 dark:text-gray-400">{t("max")}</p>
           <p className="font-mono font-semibold text-green-600">
-            {maxKwh.toLocaleString()} kWh
+            {maxKwh.toLocaleString()}
           </p>
         </div>
       </div>

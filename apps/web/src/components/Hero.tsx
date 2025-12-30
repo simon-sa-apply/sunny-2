@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { LanguageSelector } from "./LanguageSelector";
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -12,6 +13,10 @@ export function Hero({ onGetStarted }: HeroProps) {
 
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+      {/* Language Selector - Top Right */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSelector />
+      </div>
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         {/* Sun rays animation */}

@@ -37,7 +37,7 @@ export function ImpactCard({
     },
     {
       icon: "🎬",
-      value: Math.round(annualKwh / 1.2), // 8h Netflix en TV grande = ~1.2 kWh
+      value: Math.round(annualKwh / 0.15), // TV grande ~150W = 0.15 kWh/hora
       label: t("equivalences.netflix"),
     },
   ];

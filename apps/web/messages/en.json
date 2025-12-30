@@ -87,14 +87,14 @@
     "orientationLabel": "orientation"
   },
   "impact": {
-    "title": "Your environmental impact",
+    "title": "Your environmental impact in one year",
     "co2": "kg CO₂ avoided",
     "savings": "Savings/year",
     "equivalences": {
       "cars": "fewer cars",
       "trees": "trees planted",
       "phones": "phone charges",
-      "netflix": "Netflix marathons"
+      "netflix": "hours of Netflix"
     },
     "timeline": {
       "title": "In 10 years",

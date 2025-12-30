@@ -8,13 +8,19 @@ interface MapProps {
   selectedLocation?: { lat: number; lon: number } | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MapLibreMap = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MapLibreMarker = any;
+
 export function SolarMap({ onLocationSelect, selectedLocation }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const markerInstance = useRef<any>(null);
+  const mapInstance = useRef<MapLibreMap>(null);
+  const markerInstance = useRef<MapLibreMarker>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableOnLocationSelect = useCallback(onLocationSelect, []);
 
   useEffect(() => {
@@ -66,7 +72,8 @@ export function SolarMap({ onLocationSelect, selectedLocation }: MapProps) {
         map.addControl(new maplibregl.NavigationControl(), "top-right");
 
         // Handle click events
-        map.on("click", (e: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.on("click", (e: { lngLat: { lat: number; lng: number } }) => {
           const { lat, lng } = e.lngLat;
           stableOnLocationSelect(lat, lng);
         });
@@ -116,6 +123,8 @@ export function SolarMap({ onLocationSelect, selectedLocation }: MapProps) {
   useEffect(() => {
     if (!mapInstance.current || !selectedLocation) return;
 
+    const loc = selectedLocation; // Capture for closure
+
     async function updateMarker() {
       try {
         const maplibregl = (await import("maplibre-gl")).default;
@@ -148,12 +157,12 @@ export function SolarMap({ onLocationSelect, selectedLocation }: MapProps) {
         `;
 
         markerInstance.current = new maplibregl.Marker({ element: el })
-          .setLngLat([selectedLocation.lon, selectedLocation.lat])
+          .setLngLat([loc.lon, loc.lat])
           .addTo(mapInstance.current);
 
         // Fly to location
         mapInstance.current.flyTo({
-          center: [selectedLocation.lon, selectedLocation.lat],
+          center: [loc.lon, loc.lat],
           zoom: 12,
         });
       } catch (err) {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface LocationInsight {
   title: string;
   content: string;
@@ -31,14 +33,21 @@ const insightIcons: Record<string, string> = {
   lluvia: "🌧️",
   clima: "🌤️",
   climático: "🌤️",
+  temperature: "🌡️",
   temperatura: "🌡️",
   sol: "☀️",
+  sun: "☀️",
   solar: "☀️",
   radiación: "📡",
+  radiation: "📡",
   latitud: "🌍",
+  latitude: "🌍",
   recurso: "⚡",
+  resource: "⚡",
   energético: "🔋",
+  energy: "🔋",
   geográfico: "🗺️",
+  geographic: "🗺️",
   default: "📊",
 };
 
@@ -57,14 +66,13 @@ export function AIInsights({
   appliedPlugin,
   savings,
 }: AIInsightsProps) {
+  const t = useTranslations("aiInsights");
+
   // Generate default insights if AI insights not available
   const displayInsights = insights || {
-    summary:
-      "Análisis completado. Consulta los gráficos para ver la distribución mensual de generación.",
-    seasonal_analysis:
-      "La generación solar varía según la estación del año. Los meses de verano presentan mayor radiación.",
-    recommendations:
-      "Mantén los paneles limpios y revisa periódicamente la orientación para maximizar la captación.",
+    summary: "",
+    seasonal_analysis: "",
+    recommendations: "",
     location_insights: [],
   };
 
@@ -73,7 +81,7 @@ export function AIInsights({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <span className="text-2xl">🤖</span>
-          Consultor Solar IA
+          {t("title")}
         </h3>
         <div className="flex items-center gap-2">
           <span
@@ -83,26 +91,28 @@ export function AIInsights({
                 : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
             }`}
           >
-            {dataTier === "engineering" ? "🎯 Precisión Alta" : "📊 Estimación"}
+            {dataTier === "engineering" ? `🎯 ${t("dataTier.engineering")}` : `📊 ${t("dataTier.standard")}`}
           </span>
           <span className="text-xs text-gray-500">
-            Confianza: {(confidenceScore * 100).toFixed(0)}%
+            {t("confidence")}: {(confidenceScore * 100).toFixed(0)}%
           </span>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="mb-6">
-        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-          {displayInsights.summary}
-        </p>
-      </div>
+      {displayInsights.summary && (
+        <div className="mb-6">
+          <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+            {displayInsights.summary}
+          </p>
+        </div>
+      )}
 
       {/* Seasonal Analysis */}
       {displayInsights.seasonal_analysis && (
         <div className="mb-6 p-4 bg-sky-50 dark:bg-sky-900/20 rounded-lg">
           <h4 className="font-semibold text-sky-800 dark:text-sky-300 mb-2">
-            📅 Análisis Estacional
+            📅 {t("seasonal")}
           </h4>
           <p className="text-gray-700 dark:text-gray-300">
             {displayInsights.seasonal_analysis}
@@ -110,12 +120,12 @@ export function AIInsights({
         </div>
       )}
 
-      {/* Location Insights - NEW ENRICHED DATA */}
+      {/* Location Insights - ENRICHED DATA */}
       {displayInsights.location_insights && displayInsights.location_insights.length > 0 && (
         <div className="mb-6 space-y-4">
           <h4 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
             <span className="text-xl">🌍</span>
-            Datos Climáticos y Geográficos de tu Ubicación
+            {t("locationData")}
           </h4>
           <div className="grid md:grid-cols-2 gap-4">
             {displayInsights.location_insights.map((insight, index) => (
@@ -149,7 +159,7 @@ export function AIInsights({
       {displayInsights.recommendations && (
         <div className="mb-6 p-4 bg-solar-50 dark:bg-solar-900/20 rounded-lg">
           <h4 className="font-semibold text-solar-800 dark:text-solar-300 mb-2">
-            💡 Recomendaciones
+            💡 {t("recommendations")}
           </h4>
           <p className="text-gray-700 dark:text-gray-300">
             {displayInsights.recommendations}
@@ -162,22 +172,23 @@ export function AIInsights({
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <h4 className="font-semibold text-green-800 dark:text-green-300 mb-1">
-              💰 Ahorro Estimado
+              💰 {t("savings")}
             </h4>
             <p className="text-2xl font-bold text-green-600">
               {savings.currency_symbol}
               {savings.annual_savings.toLocaleString()}
+              <span className="text-lg font-normal ml-1">USD</span>
             </p>
-            <p className="text-sm text-gray-500">al año</p>
+            <p className="text-sm text-gray-500">{t("perYear")}</p>
           </div>
           <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
             <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-1">
-              🌍 CO₂ Evitado
+              🌍 CO₂
             </h4>
             <p className="text-2xl font-bold text-emerald-600">
               {savings.co2_savings_kg.toLocaleString()} kg
             </p>
-            <p className="text-sm text-gray-500">al año</p>
+            <p className="text-sm text-gray-500">{t("co2")}</p>
           </div>
         </div>
       )}
@@ -185,7 +196,7 @@ export function AIInsights({
       {/* Applied Plugin */}
       {appliedPlugin && (
         <div className="text-xs text-gray-500 border-t border-gray-200 dark:border-gray-700 pt-4">
-          📋 Normativa aplicada: {appliedPlugin}
+          📋 {t("plugin")}: {appliedPlugin}
         </div>
       )}
 
@@ -202,13 +213,12 @@ export function AIInsights({
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p className="text-xs text-gray-500">
           {displayInsights.citations && displayInsights.citations.length > 0 ? (
-            <>Fuentes: {displayInsights.citations.join(", ")}</>
+            <>{t("sources")}: {displayInsights.citations.join(", ")}</>
           ) : (
-            <>Fuentes: ERA5-Land (ECMWF), CAMS Solar Radiation (ESA/Copernicus), PVGIS TMY (JRC)</>
+            <>{t("sources")}: ERA5-Land (ECMWF), CAMS Solar Radiation (ESA/Copernicus), PVGIS TMY (JRC)</>
           )}
         </p>
       </div>
     </div>
   );
 }
-

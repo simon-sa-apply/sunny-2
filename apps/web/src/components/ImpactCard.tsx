@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface ImpactCardProps {
   annualKwh: number;
@@ -9,47 +10,37 @@ interface ImpactCardProps {
   annualSavings?: number;
 }
 
-// Impact equivalences for storytelling
-const getEquivalences = (kwh: number) => {
-  return [
-    {
-      icon: "🚗",
-      value: Math.round(kwh / 15),
-      unit: "cargas",
-      label: "de auto eléctrico",
-      description: "Cargas completas de un Tesla Model 3",
-    },
-    {
-      icon: "📱",
-      value: Math.round(kwh * 1000 / 10),
-      unit: "",
-      label: "celulares cargados",
-      description: "Cada carga consume ~10 Wh",
-    },
-    {
-      icon: "🌳",
-      value: Math.round(kwh * 0.4 / 20),
-      unit: "",
-      label: "árboles equivalentes",
-      description: "Absorción de CO₂ anual",
-    },
-    {
-      icon: "💡",
-      value: Math.round(kwh / 10 / 365),
-      unit: "h/día",
-      label: "de iluminación LED",
-      description: "Con bombillas de 10W",
-    },
-  ];
-};
-
 export function ImpactCard({
   annualKwh,
   co2SavedKg,
   currencySymbol = "$",
   annualSavings,
 }: ImpactCardProps) {
-  const equivalences = getEquivalences(annualKwh);
+  const t = useTranslations("impact");
+
+  // Impact equivalences for storytelling
+  const equivalences = [
+    {
+      icon: "🚗",
+      value: Math.round(annualKwh / 15),
+      label: t("equivalences.cars"),
+    },
+    {
+      icon: "🌳",
+      value: Math.round(annualKwh * 0.4 / 20),
+      label: t("equivalences.trees"),
+    },
+    {
+      icon: "📱",
+      value: Math.round(annualKwh * 1000 / 10),
+      label: t("equivalences.phones"),
+    },
+    {
+      icon: "💡",
+      value: Math.round(annualKwh / 10 / 365),
+      label: t("equivalences.bulbs"),
+    },
+  ];
 
   return (
     <motion.div
@@ -71,7 +62,7 @@ export function ImpactCard({
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <span className="text-2xl">🌍</span>
-          <h3 className="font-semibold text-lg">Tu impacto ambiental</h3>
+          <h3 className="font-semibold text-lg">{t("title")}</h3>
         </div>
 
         {/* Main stats */}
@@ -82,7 +73,7 @@ export function ImpactCard({
                 {co2SavedKg.toLocaleString()}
                 <span className="text-lg font-normal ml-1">kg</span>
               </div>
-              <div className="text-sm text-white/80">CO₂ evitado/año</div>
+              <div className="text-sm text-white/80">{t("co2")}</div>
             </div>
           )}
           {annualSavings && (
@@ -90,17 +81,15 @@ export function ImpactCard({
               <div className="text-3xl font-bold">
                 {currencySymbol}
                 {annualSavings.toLocaleString()}
+                <span className="text-lg font-normal ml-1">USD</span>
               </div>
-              <div className="text-sm text-white/80">Ahorro/año</div>
+              <div className="text-sm text-white/80">{t("savings")}</div>
             </div>
           )}
         </div>
 
         {/* Equivalences */}
         <div className="space-y-3">
-          <div className="text-sm font-medium text-white/80 mb-2">
-            Esto equivale a:
-          </div>
           <div className="grid grid-cols-2 gap-2">
             {equivalences.map((eq, i) => (
               <motion.div
@@ -113,8 +102,7 @@ export function ImpactCard({
                 <span className="text-xl">{eq.icon}</span>
                 <div>
                   <div className="font-semibold text-sm">
-                    {eq.value.toLocaleString()}{" "}
-                    <span className="font-normal text-white/70">{eq.unit}</span>
+                    {eq.value.toLocaleString()}
                   </div>
                   <div className="text-xs text-white/60">{eq.label}</div>
                 </div>
@@ -127,17 +115,18 @@ export function ImpactCard({
         <div className="mt-6 pt-4 border-t border-white/20">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-white/80">En 10 años generarás</div>
+              <div className="text-sm text-white/80">{t("timeline.title")}</div>
               <div className="text-2xl font-bold">
                 {(annualKwh * 10).toLocaleString()} kWh
               </div>
             </div>
             {annualSavings && (
               <div className="text-right">
-                <div className="text-sm text-white/80">Ahorrarás</div>
+                <div className="text-sm text-white/80">{t("timeline.savings")}</div>
                 <div className="text-2xl font-bold">
                   {currencySymbol}
                   {(annualSavings * 10).toLocaleString()}
+                  <span className="text-base font-normal ml-1">USD</span>
                 </div>
               </div>
             )}
@@ -147,4 +136,3 @@ export function ImpactCard({
     </motion.div>
   );
 }
-

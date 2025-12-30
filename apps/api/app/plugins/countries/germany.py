@@ -33,13 +33,13 @@ class GermanyPlugin(CountryPlugin):
             # Regulatory reference
             regulatory_reference="EEG 2023 + DIN V 18599",
             
-            # Currency
-            currency="EUR",
-            currency_symbol="€",
+            # Currency (standardized to USD)
+            currency="USD",
+            currency_symbol="$",
             
-            # Average residential electricity price (EUR/kWh)
-            # As of 2024, ~0.30-0.40 EUR/kWh
-            avg_electricity_price=0.35,
+            # Average residential electricity price (USD/kWh)
+            # ~€0.35/kWh ≈ $0.38/kWh
+            avg_electricity_price=0.38,
         )
 
     def calculate_savings(self, generation_kwh: float, custom_price=None):

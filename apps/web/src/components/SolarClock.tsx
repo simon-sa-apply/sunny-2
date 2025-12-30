@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 interface SolarClockProps {
   interpolationModel: {
@@ -40,6 +41,7 @@ export function SolarClock({
   initialTilt = 30,
   initialOrientation = 180,
 }: SolarClockProps) {
+  const t = useTranslations("solarClock");
   const [tilt, setTilt] = useState(initialTilt);
   const [orientation, setOrientation] = useState(initialOrientation);
 
@@ -80,9 +82,9 @@ export function SolarClock({
       : "text-red-600";
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg h-full flex flex-col w-full">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-        ☀️ Reloj Solar Interactivo
+        ☀️ {t("title")}
       </h3>
 
       {/* Annual KWH Display */}
@@ -90,16 +92,16 @@ export function SolarClock({
         <span className="text-4xl font-bold text-gray-900 dark:text-white">
           {result.annual_kwh.toLocaleString()}
         </span>
-        <span className="text-lg text-gray-500 ml-2">kWh/año</span>
+        <span className="text-lg text-gray-500 ml-2">kWh/year</span>
         <div className={`text-sm mt-1 ${efficiencyColor}`}>
-          {(result.efficiency * 100).toFixed(0)}% del óptimo
+          {(result.efficiency * 100).toFixed(0)}% {t("efficiency")}
         </div>
       </div>
 
       {/* Tilt Slider */}
       <div className="mb-6">
         <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          <span>Inclinación</span>
+          <span>{t("tilt")}</span>
           <span className="font-mono text-solar-600">{tilt}°</span>
         </label>
         <input
@@ -120,7 +122,7 @@ export function SolarClock({
       {/* Orientation Compass */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Orientación
+          {t("orientation")}
         </label>
         <div className="grid grid-cols-3 gap-2">
           {Object.entries(ORIENTATION_LABELS).map(([deg, label]) => (
@@ -144,12 +146,11 @@ export function SolarClock({
       {interpolationModel && (
         <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <p className="text-sm text-green-700 dark:text-green-400">
-            💡 Óptimo: {interpolationModel.optimal_tilt}° inclinación,{" "}
-            {ORIENTATION_LABELS[interpolationModel.optimal_orientation] || "N"}
+            💡 {t("optimal")}: {interpolationModel.optimal_tilt}° {t("tilt").toLowerCase()},{" "}
+            {ORIENTATION_LABELS[interpolationModel.optimal_orientation] || "N"} {t("orientationLabel")}
           </p>
         </div>
       )}
     </div>
   );
 }
-

@@ -34,13 +34,13 @@ class ChilePlugin(CountryPlugin):
             # Regulatory reference
             regulatory_reference="Ley 21.118 - Net Billing",
             
-            # Currency
-            currency="CLP",
+            # Currency (standardized to USD)
+            currency="USD",
             currency_symbol="$",
             
-            # Average residential electricity price (CLP/kWh)
-            # As of 2024, ~150-200 CLP/kWh
-            avg_electricity_price=175.0,
+            # Average residential electricity price (USD/kWh)
+            # ~CLP 175/kWh ≈ $0.18/kWh
+            avg_electricity_price=0.18,
         )
 
 

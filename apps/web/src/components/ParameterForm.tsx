@@ -5,9 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const schema = z.object({
-  area_m2: z.number().min(1, "Mínimo 1 m²").max(10000, "Máximo 10,000 m²"),
+  area_m2: z.number().min(1).max(10000),
   tilt: z.number().min(0).max(90).optional(),
   orientation: z
     .enum(["N", "S", "E", "W", "NE", "NW", "SE", "SW", "auto"])
@@ -24,23 +25,16 @@ interface ParameterFormProps {
 }
 
 const ORIENTATIONS = [
-  { value: "auto", label: "Óptimo Auto", icon: "✨", description: "Calculamos el mejor" },
-  { value: "N", label: "Norte", icon: "⬆️" },
-  { value: "NE", label: "Noreste", icon: "↗️" },
-  { value: "E", label: "Este", icon: "➡️" },
-  { value: "SE", label: "Sureste", icon: "↘️" },
-  { value: "S", label: "Sur", icon: "⬇️" },
-  { value: "SW", label: "Suroeste", icon: "↙️" },
-  { value: "W", label: "Oeste", icon: "⬅️" },
-  { value: "NW", label: "Noroeste", icon: "↖️" },
+  { value: "auto", icon: "✨" },
+  { value: "N", icon: "⬆️" },
+  { value: "NE", icon: "↗️" },
+  { value: "E", icon: "➡️" },
+  { value: "SE", icon: "↘️" },
+  { value: "S", icon: "⬇️" },
+  { value: "SW", icon: "↙️" },
+  { value: "W", icon: "⬅️" },
+  { value: "NW", icon: "↖️" },
 ] as const;
-
-// Common panel sizes for quick selection
-const AREA_PRESETS = [
-  { value: 10, label: "Pequeño", description: "~6 paneles" },
-  { value: 20, label: "Mediano", description: "~12 paneles" },
-  { value: 40, label: "Grande", description: "~24 paneles" },
-];
 
 export function ParameterForm({
   onSubmit,
@@ -48,6 +42,26 @@ export function ParameterForm({
   location,
   initialTilt = 30,
 }: ParameterFormProps) {
+  const t = useTranslations("parameterForm");
+
+  const AREA_PRESETS = [
+    { value: 10, label: t("area.small"), description: "~6 panels" },
+    { value: 20, label: t("area.medium"), description: "~12 panels" },
+    { value: 40, label: t("area.large"), description: "~24 panels" },
+  ];
+
+  const ORIENTATION_LABELS: Record<string, string> = {
+    auto: t("orientation.auto"),
+    N: "North",
+    NE: "Northeast",
+    E: "East",
+    SE: "Southeast",
+    S: "South",
+    SW: "Southwest",
+    W: "West",
+    NW: "Northwest",
+  };
+
   const {
     register,
     handleSubmit,
@@ -82,7 +96,7 @@ export function ParameterForm({
             <span className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 text-sm">
               📐
             </span>
-            Superficie de paneles
+            {t("area.label")}
           </span>
           <span className="text-amber-600 font-mono">{currentArea} m²</span>
         </label>
@@ -116,7 +130,7 @@ export function ParameterForm({
             className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
                      bg-white dark:bg-slate-900 text-slate-900 dark:text-white
                      focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
-            placeholder="Ingresa un valor personalizado"
+            placeholder={t("area.custom")}
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
             m²
@@ -129,15 +143,20 @@ export function ParameterForm({
 
       {/* Tilt Slider */}
       <div>
-        <label className="flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+        <label className="flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           <span className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 text-sm">
               📐
             </span>
-            Inclinación del techo
+            {t("tilt.label")}
           </span>
           <span className="text-sky-600 font-mono">{currentTilt}°</span>
         </label>
+        
+        {/* Help text */}
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 ml-8">
+          {t("tilt.help")}
+        </p>
 
         <div className="relative">
           <input
@@ -151,9 +170,9 @@ export function ParameterForm({
           />
           {/* Markers */}
           <div className="flex justify-between text-xs text-slate-400 mt-2 px-1">
-            <span>0° Plano</span>
-            <span>30° Típico</span>
-            <span>90° Vertical</span>
+            <span>0° {t("tilt.flat")}</span>
+            <span>30° {t("tilt.typical")}</span>
+            <span>90° {t("tilt.vertical")}</span>
           </div>
         </div>
       </div>
@@ -164,7 +183,7 @@ export function ParameterForm({
           <span className="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 text-sm">
             🧭
           </span>
-          Orientación de los paneles
+          {t("orientation.label")}
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {ORIENTATIONS.map((orient) => (
@@ -184,11 +203,8 @@ export function ParameterForm({
             >
               <div className="text-xl mb-1">{orient.icon}</div>
               <div className="font-medium text-sm text-slate-900 dark:text-white">
-                {orient.label}
+                {ORIENTATION_LABELS[orient.value]}
               </div>
-              {orient.description && (
-                <div className="text-xs text-slate-500">{orient.description}</div>
-              )}
             </motion.button>
           ))}
         </div>
@@ -225,7 +241,7 @@ export function ParameterForm({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            Calculando...
+            {t("calculating")}
           </>
         ) : (
           <>
@@ -237,14 +253,14 @@ export function ParameterForm({
                 d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
               />
             </svg>
-            Calcular Potencial Solar
+            {t("submit")}
           </>
         )}
       </motion.button>
 
       {!location && (
         <p className="text-center text-slate-500 text-sm">
-          👆 Primero selecciona una ubicación en el mapa
+          👆 {t("orientation.auto").includes("optimal") ? "First select a location on the map" : "Primero selecciona una ubicación en el mapa"}
         </p>
       )}
     </form>

@@ -96,7 +96,7 @@ def test_estimate_chile_plugin(client: TestClient) -> None:
     assert data["location"]["country_code"] == "CL"
     assert "Ley 21.118" in data["applied_plugin"]
     assert data["savings"] is not None
-    assert data["savings"]["currency"] == "CLP"
+    assert data["savings"]["currency"] == "USD"
 
 
 def test_estimate_germany_plugin(client: TestClient) -> None:
@@ -115,7 +115,7 @@ def test_estimate_germany_plugin(client: TestClient) -> None:
     
     assert data["location"]["country_code"] == "DE"
     assert "EEG" in data["applied_plugin"]
-    assert data["savings"]["currency"] == "EUR"
+    assert data["savings"]["currency"] == "USD"
 
 
 def test_estimate_validation_error(client: TestClient) -> None:

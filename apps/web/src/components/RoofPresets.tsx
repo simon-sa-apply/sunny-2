@@ -1,84 +1,72 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface RoofPresetsProps {
   onSelect: (tilt: number, name: string) => void;
   selectedTilt?: number;
 }
 
-const ROOF_PRESETS = [
-  {
-    id: "flat",
-    name: "Techo plano",
-    tilt: 10,
-    icon: "🏢",
-    description: "Edificios, terrazas",
-    illustration: (
-      <svg viewBox="0 0 100 60" className="w-full h-full">
-        <rect x="10" y="30" width="80" height="25" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
-        <line x1="10" y1="30" x2="90" y2="28" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
-        <circle cx="85" cy="15" r="8" fill="currentColor" className="text-amber-400" />
-        <path d="M85 5 L85 25 M75 15 L95 15 M78 8 L92 22 M78 22 L92 8" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
-      </svg>
-    ),
-  },
-  {
-    id: "moderate",
-    name: "Inclinación típica",
-    tilt: 30,
-    icon: "🏠",
-    description: "Casas estándar",
-    illustration: (
-      <svg viewBox="0 0 100 60" className="w-full h-full">
-        <polygon points="50,10 10,40 90,40" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
-        <rect x="20" y="40" width="60" height="15" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
-        <line x1="50" y1="10" x2="90" y2="40" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
-        <circle cx="85" cy="12" r="8" fill="currentColor" className="text-amber-400" />
-        <path d="M85 2 L85 22 M75 12 L95 12" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
-      </svg>
-    ),
-  },
-  {
-    id: "steep",
-    name: "Muy inclinado",
-    tilt: 45,
-    icon: "⛰️",
-    description: "Climas nevados",
-    illustration: (
-      <svg viewBox="0 0 100 60" className="w-full h-full">
-        <polygon points="50,5 15,50 85,50" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
-        <line x1="50" y1="5" x2="85" y2="50" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
-        <circle cx="88" cy="15" r="8" fill="currentColor" className="text-amber-400" />
-        <path d="M88 5 L88 25 M78 15 L98 15" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
-      </svg>
-    ),
-  },
-  {
-    id: "custom",
-    name: "Personalizado",
-    tilt: -1, // Special value for custom
-    icon: "⚙️",
-    description: "Ajuste manual",
-    illustration: (
-      <svg viewBox="0 0 100 60" className="w-full h-full">
-        <circle cx="50" cy="30" r="20" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-300 dark:text-slate-600" strokeDasharray="5,3" />
-        <path d="M50 15 L55 25 L45 25 Z" fill="currentColor" className="text-amber-500" />
-        <path d="M50 45 L55 35 L45 35 Z" fill="currentColor" className="text-amber-500" />
-        <path d="M35 30 L45 35 L45 25 Z" fill="currentColor" className="text-amber-500" />
-        <path d="M65 30 L55 35 L55 25 Z" fill="currentColor" className="text-amber-500" />
-      </svg>
-    ),
-  },
-];
-
 export function RoofPresets({ onSelect, selectedTilt }: RoofPresetsProps) {
+  const t = useTranslations("roofPresets");
+
+  const ROOF_PRESETS = [
+    {
+      id: "flat",
+      name: t("flat.name"),
+      tilt: 10,
+      icon: "🏢",
+      description: t("flat.description"),
+      illustration: (
+        <svg viewBox="0 0 100 60" className="w-full h-full">
+          <rect x="10" y="30" width="80" height="25" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
+          <line x1="10" y1="30" x2="90" y2="28" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
+          <circle cx="85" cy="15" r="8" fill="currentColor" className="text-amber-400" />
+          <path d="M85 5 L85 25 M75 15 L95 15 M78 8 L92 22 M78 22 L92 8" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
+        </svg>
+      ),
+    },
+    {
+      id: "moderate",
+      name: t("moderate.name"),
+      tilt: 30,
+      icon: "🏠",
+      description: t("moderate.description"),
+      illustration: (
+        <svg viewBox="0 0 100 60" className="w-full h-full">
+          <polygon points="50,10 10,40 90,40" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
+          <rect x="20" y="40" width="60" height="15" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
+          <line x1="50" y1="10" x2="90" y2="40" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
+          <circle cx="85" cy="12" r="8" fill="currentColor" className="text-amber-400" />
+          <path d="M85 2 L85 22 M75 12 L95 12" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
+        </svg>
+      ),
+    },
+    {
+      id: "steep",
+      name: t("steep.name"),
+      tilt: 45,
+      icon: "⛰️",
+      description: t("steep.description"),
+      illustration: (
+        <svg viewBox="0 0 100 60" className="w-full h-full">
+          <polygon points="50,5 15,50 85,50" fill="currentColor" className="text-slate-300 dark:text-slate-600" />
+          <line x1="50" y1="5" x2="85" y2="50" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
+          <circle cx="88" cy="15" r="8" fill="currentColor" className="text-amber-400" />
+          <path d="M88 5 L88 25 M78 15 L98 15" stroke="currentColor" strokeWidth="1.5" className="text-amber-300" />
+        </svg>
+      ),
+    },
+  ];
+
   const getSelectedPreset = () => {
     if (selectedTilt === undefined) return null;
-    const preset = ROOF_PRESETS.find(
-      (p) => p.tilt === selectedTilt || (p.tilt === 10 && selectedTilt < 15) || (p.tilt === 30 && selectedTilt >= 15 && selectedTilt < 40)
-    );
-    return preset?.id || "custom";
+    // Match preset by tilt ranges
+    if (selectedTilt <= 15) return "flat";
+    if (selectedTilt <= 37) return "moderate";
+    if (selectedTilt <= 55) return "steep";
+    return "moderate"; // Default
   };
 
   const selected = getSelectedPreset();
@@ -86,9 +74,9 @@ export function RoofPresets({ onSelect, selectedTilt }: RoofPresetsProps) {
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-        Tipo de techo
+        {t("title")}
       </label>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {ROOF_PRESETS.map((preset, index) => (
           <motion.button
             key={preset.id}
@@ -132,4 +120,3 @@ export function RoofPresets({ onSelect, selectedTilt }: RoofPresetsProps) {
     </div>
   );
 }
-

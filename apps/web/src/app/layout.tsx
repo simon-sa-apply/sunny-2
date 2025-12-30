@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "sunny-2 | Solar Generation Estimator",
   description:
-    "Diagnóstico solar de alta precisión con datos de Copernicus y IA proactiva",
+    "High-precision solar diagnostics with Copernicus data and proactive AI",
   keywords: [
     "solar",
     "energy",
@@ -24,28 +26,32 @@ export const metadata: Metadata = {
     "renewable",
     "Copernicus",
   ],
-  authors: [{ name: "sunny-2 Team" }],
+  authors: [{ name: "Apply Digital" }],
   openGraph: {
     title: "sunny-2 | Solar Generation Estimator",
     description:
-      "Diagnóstico solar de alta precisión con datos de Copernicus y IA proactiva",
+      "High-precision solar diagnostics with Copernicus data and proactive AI",
     type: "website",
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="es">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
 }
-

@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface LocationSearchProps {
   onLocationSelect: (lat: number, lon: number, name?: string) => void;
-  placeholder?: string;
 }
 
 interface SearchResult {
@@ -16,15 +16,15 @@ interface SearchResult {
 
 export function LocationSearch({
   onLocationSelect,
-  placeholder = "Busca tu dirección o ciudad...",
 }: LocationSearchProps) {
+  const t = useTranslations("locationSearch");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const searchLocation = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 3) {
@@ -101,7 +101,6 @@ export function LocationSearch({
 
   const handleUseMyLocation = async () => {
     if (!navigator.geolocation) {
-      alert("Tu navegador no soporta geolocalización");
       return;
     }
 
@@ -116,17 +115,16 @@ export function LocationSearch({
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
           const data = await response.json();
-          const name = data.address?.city || data.address?.town || "Tu ubicación";
+          const name = data.address?.city || data.address?.town || t("selected");
           setQuery(name);
           onLocationSelect(latitude, longitude, name);
         } catch {
-          onLocationSelect(latitude, longitude, "Tu ubicación");
+          onLocationSelect(latitude, longitude, t("selected"));
         }
         setIsLoading(false);
       },
       (error) => {
         console.error("Geolocation error:", error);
-        alert("No pudimos obtener tu ubicación. Por favor búscala manualmente.");
         setIsLoading(false);
       }
     );
@@ -183,7 +181,7 @@ export function LocationSearch({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={t("placeholder")}
           className="w-full pl-12 pr-32 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 transition-all"
         />
 
@@ -207,7 +205,7 @@ export function LocationSearch({
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          <span className="hidden sm:inline">Mi ubicación</span>
+          <span className="hidden sm:inline">GPS</span>
         </button>
       </div>
 
@@ -251,7 +249,20 @@ export function LocationSearch({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* No results message */}
+      <AnimatePresence>
+        {isOpen && query.length >= 3 && results.length === 0 && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 text-center text-slate-500"
+          >
+            {t("noResults")}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

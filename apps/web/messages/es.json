@@ -1,0 +1,144 @@
+{
+  "hero": {
+    "badge": "Sunny-2 · Datos satelitales de Copernicus · ESA",
+    "title1": "Estimación fotovoltaica,",
+    "title2": "basada en observación satelital.",
+    "subtitle": "Conoce el potencial real de tu instalación solar.",
+    "subtitleFeatures": "20 años de datos · Resultados en segundos · Cobertura global",
+    "cta": "Calcular mi potencial",
+    "stats": {
+      "years": "años de datos",
+      "margin": "margen de error",
+      "coverage": "cobertura"
+    }
+  },
+  "locationSearch": {
+    "title": "Selecciona una ubicación",
+    "placeholder": "Buscar dirección, ciudad o coordenadas...",
+    "searching": "Buscando...",
+    "noResults": "No se encontraron resultados",
+    "selected": "Ubicación seleccionada",
+    "coordinates": "Coordenadas"
+  },
+  "parameterForm": {
+    "title": "Configura tu instalación",
+    "area": {
+      "label": "Área de paneles",
+      "small": "Pequeño",
+      "medium": "Mediano",
+      "large": "Grande",
+      "custom": "Personalizado"
+    },
+    "tilt": {
+      "label": "Inclinación del techo",
+      "help": "Ajusta el ángulo de inclinación de tus paneles respecto al suelo. Una inclinación cercana a tu latitud suele ser óptima.",
+      "flat": "Plano",
+      "typical": "Típico",
+      "vertical": "Vertical"
+    },
+    "orientation": {
+      "label": "Orientación",
+      "auto": "Automática (óptima)"
+    },
+    "submit": "Calcular generación",
+    "calculating": "Calculando..."
+  },
+  "roofPresets": {
+    "title": "Inclinación del techo",
+    "flat": {
+      "name": "Techo plano",
+      "description": "Edificios, terrazas"
+    },
+    "moderate": {
+      "name": "Inclinación típica",
+      "description": "Casas estándar"
+    },
+    "steep": {
+      "name": "Muy inclinado",
+      "description": "Climas nevados"
+    }
+  },
+  "results": {
+    "title": "kWh/año",
+    "subtitle": "Potencial de generación estimado para tu ubicación",
+    "cards": {
+      "annual": "Generación Anual",
+      "peak": "Mejor Mes",
+      "worst": "Peor Mes",
+      "efficiency": "Eficiencia",
+      "ofOptimal": "del óptimo"
+    }
+  },
+  "monthlyChart": {
+    "title": "Generación Mensual Estimada",
+    "average": "Promedio",
+    "min": "Mínimo",
+    "max": "Máximo",
+    "peak": "Mejor mes",
+    "worst": "Mes mínimo"
+  },
+  "solarClock": {
+    "title": "Reloj Solar Interactivo",
+    "tilt": "Inclinación",
+    "orientation": "Orientación",
+    "result": "Resultado",
+    "efficiency": "Eficiencia",
+    "optimal": "Óptimo",
+    "orientationLabel": "orientación"
+  },
+  "impact": {
+    "title": "Tu impacto ambiental",
+    "co2": "kg CO₂ evitados",
+    "savings": "Ahorro/año",
+    "equivalences": {
+      "cars": "autos menos en la calle",
+      "trees": "árboles plantados",
+      "phones": "cargas de smartphone",
+      "bulbs": "horas de luz LED"
+    },
+    "timeline": {
+      "title": "En 10 años",
+      "savings": "Ahorrarás"
+    }
+  },
+  "aiInsights": {
+    "title": "Consultor Solar IA",
+    "poweredBy": "Powered by Gemini 2.0",
+    "summary": "Resumen",
+    "seasonal": "Análisis Estacional",
+    "locationData": "Datos Climáticos y Geográficos de tu Ubicación",
+    "recommendations": "Recomendaciones",
+    "savings": "Ahorro Estimado",
+    "perYear": "al año",
+    "co2": "de CO₂ evitados al año",
+    "plugin": "Cálculo con normativa",
+    "dataTier": {
+      "engineering": "Datos de alta precisión (Copernicus CAMS)",
+      "standard": "Datos estándar (promedios regionales)"
+    },
+    "confidence": "Confianza",
+    "sources": "Fuentes"
+  },
+  "progress": {
+    "connecting": "Conectando...",
+    "satellite": "Conectando con satélite Copernicus...",
+    "downloading": "Descargando datos de radiación...",
+    "calculating": "Calculando potencial solar...",
+    "complete": "¡Completado!",
+    "completeNoAI": "¡Completado (sin IA)!"
+  },
+  "errors": {
+    "title": "Error",
+    "calculation": "Error al calcular estimación"
+  },
+  "footer": {
+    "dataFrom": "Datos de",
+    "and": "y"
+  },
+  "languageSelector": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  }
+}
+

@@ -1,0 +1,144 @@
+{
+  "hero": {
+    "badge": "Sunny-2 · Copernicus satellite data · ESA",
+    "title1": "Photovoltaic estimation,",
+    "title2": "based on satellite observation.",
+    "subtitle": "Discover the real potential of your solar installation.",
+    "subtitleFeatures": "20 years of data · Results in seconds · Global coverage",
+    "cta": "Calculate my potential",
+    "stats": {
+      "years": "years of data",
+      "margin": "error margin",
+      "coverage": "coverage"
+    }
+  },
+  "locationSearch": {
+    "title": "Select a location",
+    "placeholder": "Search address, city or coordinates...",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "selected": "Selected location",
+    "coordinates": "Coordinates"
+  },
+  "parameterForm": {
+    "title": "Configure your installation",
+    "area": {
+      "label": "Panel area",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "custom": "Custom"
+    },
+    "tilt": {
+      "label": "Roof tilt",
+      "help": "Adjust the tilt angle of your panels relative to the ground. A tilt close to your latitude is usually optimal.",
+      "flat": "Flat",
+      "typical": "Typical",
+      "vertical": "Vertical"
+    },
+    "orientation": {
+      "label": "Orientation",
+      "auto": "Automatic (optimal)"
+    },
+    "submit": "Calculate generation",
+    "calculating": "Calculating..."
+  },
+  "roofPresets": {
+    "title": "Roof tilt",
+    "flat": {
+      "name": "Flat roof",
+      "description": "Buildings, terraces"
+    },
+    "moderate": {
+      "name": "Typical tilt",
+      "description": "Standard houses"
+    },
+    "steep": {
+      "name": "Steep tilt",
+      "description": "Snowy climates"
+    }
+  },
+  "results": {
+    "title": "kWh/year",
+    "subtitle": "Estimated generation potential for your location",
+    "cards": {
+      "annual": "Annual Generation",
+      "peak": "Best Month",
+      "worst": "Worst Month",
+      "efficiency": "Efficiency",
+      "ofOptimal": "of optimal"
+    }
+  },
+  "monthlyChart": {
+    "title": "Estimated Monthly Generation",
+    "average": "Average",
+    "min": "Minimum",
+    "max": "Maximum",
+    "peak": "Best month",
+    "worst": "Worst month"
+  },
+  "solarClock": {
+    "title": "Interactive Solar Clock",
+    "tilt": "Tilt",
+    "orientation": "Orientation",
+    "result": "Result",
+    "efficiency": "Efficiency",
+    "optimal": "Optimal",
+    "orientationLabel": "orientation"
+  },
+  "impact": {
+    "title": "Your environmental impact",
+    "co2": "kg CO₂ avoided",
+    "savings": "Savings/year",
+    "equivalences": {
+      "cars": "fewer cars on the road",
+      "trees": "trees planted",
+      "phones": "smartphone charges",
+      "bulbs": "hours of LED light"
+    },
+    "timeline": {
+      "title": "In 10 years",
+      "savings": "You'll save"
+    }
+  },
+  "aiInsights": {
+    "title": "AI Solar Consultant",
+    "poweredBy": "Powered by Gemini 2.0",
+    "summary": "Summary",
+    "seasonal": "Seasonal Analysis",
+    "locationData": "Climate and Geographic Data for Your Location",
+    "recommendations": "Recommendations",
+    "savings": "Estimated Savings",
+    "perYear": "per year",
+    "co2": "of CO₂ avoided per year",
+    "plugin": "Calculation with regulation",
+    "dataTier": {
+      "engineering": "High-precision data (Copernicus CAMS)",
+      "standard": "Standard data (regional averages)"
+    },
+    "confidence": "Confidence",
+    "sources": "Sources"
+  },
+  "progress": {
+    "connecting": "Connecting...",
+    "satellite": "Connecting to Copernicus satellite...",
+    "downloading": "Downloading radiation data...",
+    "calculating": "Calculating solar potential...",
+    "complete": "Complete!",
+    "completeNoAI": "Complete (no AI)!"
+  },
+  "errors": {
+    "title": "Error",
+    "calculation": "Error calculating estimate"
+  },
+  "footer": {
+    "dataFrom": "Data from",
+    "and": "and"
+  },
+  "languageSelector": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  }
+}
+

@@ -9,3 +9,4 @@ export { Hero } from "./Hero";
 export { LocationSearch } from "./LocationSearch";
 export { RoofPresets } from "./RoofPresets";
 export { ImpactCard } from "./ImpactCard";
+export { LanguageSelector } from "./LanguageSelector";

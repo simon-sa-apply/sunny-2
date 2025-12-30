@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface HeroProps {
   onGetStarted: () => void;
 }
 
 export function Hero({ onGetStarted }: HeroProps) {
+  const t = useTranslations("hero");
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
       {/* Animated Background */}
@@ -48,7 +51,7 @@ export function Hero({ onGetStarted }: HeroProps) {
           <span className="w-1 h-1 rounded-full bg-white/40" />
           <span className="text-amber-300 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            Datos Copernicus · ESA
+            {t("badge").replace("Sunny-2 · ", "")}
           </span>
         </motion.div>
 
@@ -59,10 +62,10 @@ export function Hero({ onGetStarted }: HeroProps) {
           transition={{ delay: 0.2 }}
           className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight"
         >
-          Estimación fotovoltaica,
+          {t("title1")}
           <br />
           <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-            basada en observación satelital.
+            {t("title2")}
           </span>
         </motion.h1>
 
@@ -73,24 +76,24 @@ export function Hero({ onGetStarted }: HeroProps) {
           transition={{ delay: 0.3 }}
           className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          Conoce el potencial real de tu instalación solar.
+          {t("subtitle")}
           <br className="hidden md:block" />
-          <span className="text-white font-medium">20 años de datos</span> · Resultados en segundos · Cobertura global
+          <span className="text-white/80">{t("subtitleFeatures")}</span>
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTA Button */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex justify-center"
         >
           <button
             onClick={onGetStarted}
-            className="group relative px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl font-semibold text-white text-lg shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 transition-all hover:scale-105"
+            className="group relative px-10 py-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl font-semibold text-white text-lg shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 transition-all hover:scale-105"
           >
             <span className="relative z-10 flex items-center gap-2">
-              Calcular mi potencial
+              {t("cta")}
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                 fill="none"
@@ -106,24 +109,6 @@ export function Hero({ onGetStarted }: HeroProps) {
               </svg>
             </span>
           </button>
-
-          <button className="px-6 py-4 text-slate-300 hover:text-white transition-colors flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Ver cómo funciona
-          </button>
         </motion.div>
 
         {/* Stats */}
@@ -134,15 +119,15 @@ export function Hero({ onGetStarted }: HeroProps) {
           className="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
         >
           {[
-            { value: "20+", label: "años de datos" },
-            { value: "<5%", label: "margen de error" },
-            { value: "Global", label: "cobertura" },
+            { value: "20+", labelKey: "stats.years" },
+            { value: "<5%", labelKey: "stats.margin" },
+            { value: "Global", labelKey: "stats.coverage" },
           ].map((stat, i) => (
             <div key={i} className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">
                 {stat.value}
               </div>
-              <div className="text-sm text-slate-400">{stat.label}</div>
+              <div className="text-sm text-slate-400">{t(stat.labelKey)}</div>
             </div>
           ))}
         </motion.div>
@@ -166,4 +151,3 @@ export function Hero({ onGetStarted }: HeroProps) {
     </section>
   );
 }
-

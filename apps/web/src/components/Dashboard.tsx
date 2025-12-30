@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Hero } from "./Hero";
 import { LocationSearch } from "./LocationSearch";
 import { SolarMap } from "./Map";
@@ -12,6 +13,7 @@ import { AIInsights } from "./AIInsights";
 import { ProgressBar } from "./ProgressBar";
 import { ImpactCard } from "./ImpactCard";
 import { RoofPresets } from "./RoofPresets";
+import { LanguageSelector } from "./LanguageSelector";
 
 interface EstimateResult {
   annual_generation_kwh: number;
@@ -49,6 +51,13 @@ interface EstimateResult {
 }
 
 export function Dashboard() {
+  const tResults = useTranslations("results");
+  const tProgress = useTranslations("progress");
+  const tErrors = useTranslations("errors");
+  const tFooter = useTranslations("footer");
+  const tForm = useTranslations("parameterForm");
+  const tLocation = useTranslations("locationSearch");
+
   const [showCalculator, setShowCalculator] = useState(false);
   const [location, setLocation] = useState<{
     lat: number;
@@ -78,9 +87,8 @@ export function Dashboard() {
     []
   );
 
-  const handleRoofPresetSelect = useCallback((tilt: number, name: string) => {
+  const handleRoofPresetSelect = useCallback((tilt: number) => {
     if (tilt === -1) {
-      // Custom - don't change the tilt, user will use the slider
       return;
     }
     setSelectedTilt(tilt);
@@ -95,7 +103,7 @@ export function Dashboard() {
 
     setIsLoading(true);
     setError(null);
-    setProgress({ percent: 0, message: "Conectando..." });
+    setProgress({ percent: 0, message: tProgress("connecting") });
 
     const requestBody = {
       lat: location.lat,
@@ -106,34 +114,31 @@ export function Dashboard() {
     };
 
     try {
-      setProgress({ percent: 20, message: "🛰️ Conectando con satélite Copernicus..." });
+      setProgress({ percent: 20, message: `🛰️ ${tProgress("satellite")}` });
 
-      // OPTIMIZED: First call without AI insights for fast response (~1s cached, ~15s new)
       const fastResponse = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...requestBody, include_ai_insights: false }),
       });
 
-      setProgress({ percent: 70, message: "🧮 Calculando potencial solar..." });
+      setProgress({ percent: 70, message: `🧮 ${tProgress("calculating")}` });
 
       if (!fastResponse.ok) {
-        throw new Error("Error al calcular estimación");
+        throw new Error(tErrors("calculation"));
       }
 
       const fastResult = await fastResponse.json();
-      setProgress({ percent: 85, message: "✨ ¡Resultados listos!" });
+      setProgress({ percent: 85, message: `✨ ${tProgress("complete")}` });
       setResult(fastResult);
 
-      // Scroll to results immediately
       setTimeout(() => {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
       }, 300);
 
       setIsLoading(false);
 
-      // BACKGROUND: Load AI insights separately (adds ~5s but doesn't block UI)
-      setProgress({ percent: 90, message: "🤖 Generando análisis IA..." });
+      setProgress({ percent: 90, message: "🤖 AI analysis..." });
       
       fetch("/api/estimate", {
         method: "POST",
@@ -146,16 +151,15 @@ export function Dashboard() {
             setResult((prev) =>
               prev ? { ...prev, ai_insights: fullResult.ai_insights } : prev
             );
-            setProgress({ percent: 100, message: "✨ ¡Análisis completo!" });
+            setProgress({ percent: 100, message: `✨ ${tProgress("complete")}` });
           }
         })
         .catch((err) => {
           console.warn("Failed to load AI insights:", err);
-          // Silent fail - main results are already shown
         });
 
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error desconocido");
+      setError(e instanceof Error ? e.message : "Unknown error");
       setIsLoading(false);
     }
   };
@@ -195,12 +199,11 @@ export function Dashboard() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
-                  Volver
                 </button>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                   sunny<span className="text-amber-500">-2</span>
                 </h1>
-                <div className="w-20" />
+                <LanguageSelector />
               </div>
             </header>
 
@@ -213,11 +216,8 @@ export function Dashboard() {
               >
                 <div className="text-center mb-8">
                   <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                    ¿Dónde está tu techo?
+                    {tLocation("title")}
                   </h2>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Busca tu dirección o haz clic en el mapa
-                  </p>
                 </div>
 
                 <LocationSearch onLocationSelect={handleLocationSelect} />
@@ -246,7 +246,7 @@ export function Dashboard() {
                       </div>
                       <div>
                         <div className="font-medium text-emerald-900 dark:text-emerald-100">
-                          {location.name || "Ubicación seleccionada"}
+                          {location.name || tLocation("selected")}
                         </div>
                         <div className="text-sm text-emerald-700 dark:text-emerald-300">
                           {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
@@ -271,7 +271,7 @@ export function Dashboard() {
                         <span className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600">
                           ☀️
                         </span>
-                        Configura tu instalación
+                        {tForm("title")}
                       </h2>
 
                       {/* Roof Presets */}
@@ -324,7 +324,7 @@ export function Dashboard() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="font-medium text-red-900 dark:text-red-100">Error</h3>
+                        <h3 className="font-medium text-red-900 dark:text-red-100">{tErrors("title")}</h3>
                         <p className="text-red-700 dark:text-red-300">{error}</p>
                       </div>
                     </div>
@@ -354,11 +354,11 @@ export function Dashboard() {
                       <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
                         {result.annual_generation_kwh.toLocaleString()}
                         <span className="text-2xl font-normal text-slate-500 ml-2">
-                          kWh/año
+                          {tResults("title")}
                         </span>
                       </h2>
                       <p className="text-slate-600 dark:text-slate-400">
-                        Potencial de generación estimado para tu ubicación
+                        {tResults("subtitle")}
                       </p>
                     </div>
 
@@ -370,11 +370,11 @@ export function Dashboard() {
                         transition={{ delay: 0.1 }}
                         className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white"
                       >
-                        <div className="text-sm opacity-80">Generación Anual</div>
+                        <div className="text-sm opacity-80">{tResults("cards.annual")}</div>
                         <div className="text-3xl font-bold mt-1">
                           {result.annual_generation_kwh.toLocaleString()}
                         </div>
-                        <div className="text-sm opacity-80">kWh/año</div>
+                        <div className="text-sm opacity-80">{tResults("title")}</div>
                       </motion.div>
 
                       <motion.div
@@ -383,7 +383,7 @@ export function Dashboard() {
                         transition={{ delay: 0.2 }}
                         className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">Mejor Mes</div>
+                        <div className="text-sm text-slate-500">{tResults("cards.peak")}</div>
                         <div className="text-3xl font-bold text-emerald-600 mt-1">
                           {result.peak_month.month}
                         </div>
@@ -398,7 +398,7 @@ export function Dashboard() {
                         transition={{ delay: 0.3 }}
                         className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">Peor Mes</div>
+                        <div className="text-sm text-slate-500">{tResults("cards.worst")}</div>
                         <div className="text-3xl font-bold text-blue-600 mt-1">
                           {result.worst_month.month}
                         </div>
@@ -413,31 +413,20 @@ export function Dashboard() {
                         transition={{ delay: 0.4 }}
                         className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700"
                       >
-                        <div className="text-sm text-slate-500">Eficiencia</div>
+                        <div className="text-sm text-slate-500">{tResults("cards.efficiency")}</div>
                         <div className="text-3xl font-bold text-purple-600 mt-1">
                           {(result.optimization.efficiency_vs_optimal * 100).toFixed(0)}%
                         </div>
-                        <div className="text-sm text-slate-500">del óptimo</div>
+                        <div className="text-sm text-slate-500">{tResults("cards.ofOptimal")}</div>
                       </motion.div>
                     </div>
 
-                    {/* Charts and Details */}
-                    <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                      <div className="lg:col-span-2 space-y-8">
+                    {/* Charts Row: Monthly Chart (2/3) + Solar Clock (1/3) */}
+                    <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                      <div className="lg:col-span-2 h-full">
                         <MonthlyChart data={result.monthly_breakdown} />
-                        
-                        {/* Impact Card */}
-                        {result.savings && (
-                          <ImpactCard
-                            annualKwh={result.annual_generation_kwh}
-                            co2SavedKg={result.savings.co2_savings_kg}
-                            currencySymbol={result.savings.currency_symbol}
-                            annualSavings={result.savings.annual_savings}
-                          />
-                        )}
                       </div>
-
-                      <div className="space-y-8">
+                      <div className="h-full flex">
                         <SolarClock
                           interpolationModel={{
                             tilts: Array.from({ length: 19 }, (_, i) => i * 5),
@@ -456,8 +445,20 @@ export function Dashboard() {
                       </div>
                     </div>
 
-                    {/* AI Insights */}
-                    <div className="max-w-4xl mx-auto">
+                    {/* Impact Card - Full Width */}
+                    {result.savings && (
+                      <div className="max-w-6xl mx-auto">
+                        <ImpactCard
+                          annualKwh={result.annual_generation_kwh}
+                          co2SavedKg={result.savings.co2_savings_kg}
+                          currencySymbol={result.savings.currency_symbol}
+                          annualSavings={result.savings.annual_savings}
+                        />
+                      </div>
+                    )}
+
+                    {/* AI Insights - Full Width */}
+                    <div className="max-w-6xl mx-auto">
                       <AIInsights
                         insights={result.ai_insights}
                         dataTier={result.data_tier}
@@ -475,13 +476,10 @@ export function Dashboard() {
             <footer className="border-t border-slate-200 dark:border-slate-700 mt-16">
               <div className="container mx-auto px-4 py-8 text-center text-slate-500">
                 <p>
-                  Datos de{" "}
+                  {tFooter("dataFrom")}{" "}
                   <span className="font-semibold text-sky-600">Copernicus CDSE (ESA)</span>{" "}
-                  · IA powered by{" "}
+                  {tFooter("and")}{" "}
                   <span className="font-semibold text-purple-600">Gemini 2.0</span>
-                </p>
-                <p className="text-sm mt-2 text-slate-400">
-                  Precisión científica. Transparencia total.
                 </p>
               </div>
             </footer>

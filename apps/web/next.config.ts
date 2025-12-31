@@ -9,14 +9,19 @@ const nextConfig: NextConfig = {
     // Enable optimizations for Turborepo
     optimizePackageImports: ["recharts", "maplibre-gl"],
   },
-  // API proxy for development
+  // API proxy for development only
+  // In production, Vercel rewrites handle this via vercel.json
   async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: "http://localhost:8000/api/v1/:path*",
-      },
-    ];
+    // Only use localhost rewrite in development
+    if (process.env.NODE_ENV === "development") {
+      return [
+        {
+          source: "/api/v1/:path*",
+          destination: "http://localhost:8000/api/v1/:path*",
+        },
+      ];
+    }
+    return [];
   },
 };
 

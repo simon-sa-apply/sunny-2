@@ -4,54 +4,53 @@ sunny-2 API - Solar Generation Estimator
 High-precision solar diagnostics powered by Copernicus CDSE and Gemini 2.0
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
-from app.core.config import settings
 from slowapi.errors import RateLimitExceeded
 
+from app.core.config import settings
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
-from app.routers import health, estimate, progress, geosearch, api_keys, analyses, cron
+from app.routers import analyses, api_keys, cron, estimate, geosearch, health, progress
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler for startup/shutdown events."""
-    from app.core.database import db
     from app.core.cache import cache
+    from app.core.database import db
     from app.services.ai_consultant import ai_consultant
-    
+
     # Startup
     print(f"🌞 Starting sunny-2 API v{settings.VERSION}")
     print(f"📡 Environment: {settings.ENVIRONMENT}")
-    
+
     # Initialize database connection
     if db.is_configured:
         db.init()
         print("🗄️ Database connection initialized")
     else:
         print("⚠️ Database not configured (set DATABASE_URL)")
-    
+
     # Initialize Redis cache
     if cache.is_configured:
         cache.init()
         print("📦 Redis cache initialized")
     else:
         print("⚠️ Redis not configured (set UPSTASH_REDIS_REST_URL)")
-    
+
     # Initialize AI consultant (Gemini)
     if ai_consultant.is_configured:
         ai_consultant.init()
         print("🤖 AI Consultant (Gemini 2.0) initialized")
     else:
         print("⚠️ AI Consultant not configured (set GEMINI_API_KEY)")
-    
+
     yield
-    
+
     # Shutdown
     if db.is_configured:
         await db.close()

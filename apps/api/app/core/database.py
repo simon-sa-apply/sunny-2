@@ -1,9 +1,9 @@
 """Database connection and session management."""
 
 import ssl
-from contextlib import asynccontextmanager
-from typing import Any, Optional
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from typing import Any
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -19,8 +19,8 @@ class DatabaseManager:
     """Manages database connections and sessions."""
 
     def __init__(self) -> None:
-        self._engine: Optional[AsyncEngine] = None
-        self._session_factory: Optional[async_sessionmaker[AsyncSession]] = None
+        self._engine: AsyncEngine | None = None
+        self._session_factory: async_sessionmaker[AsyncSession] | None = None
 
     @property
     def is_configured(self) -> bool:
@@ -44,7 +44,7 @@ class DatabaseManager:
             base_url, params = db_url.split("?", 1)
             # Filter out sslmode and channel_binding params
             filtered_params = "&".join(
-                p for p in params.split("&") 
+                p for p in params.split("&")
                 if not p.startswith("sslmode=") and not p.startswith("channel_binding=")
             )
             db_url = f"{base_url}?{filtered_params}" if filtered_params else base_url

@@ -7,7 +7,7 @@ Acts as the "Virtual Energy Consultant" for users.
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from app.core.config import settings
 
@@ -49,8 +49,8 @@ class AIConsultant:
     """
 
     def __init__(self) -> None:
-        self._client: Optional[Any] = None
-        self._model: Optional[Any] = None
+        self._client: Any | None = None
+        self._model: Any | None = None
 
     @property
     def is_configured(self) -> bool:
@@ -79,20 +79,20 @@ class AIConsultant:
     async def generate_narrative(
         self,
         calculation_data: dict[str, Any],
-        country_plugin: Optional[str] = None,
+        country_plugin: str | None = None,
         timeout_seconds: float = 8.0,
     ) -> dict[str, Any]:
         """
         Generate AI narrative from calculation data.
-        
+
         OPTIMIZED: Uses timeout to prevent blocking. Falls back to local
         generation if Gemini takes too long (>8 seconds by default).
-        
+
         Args:
             calculation_data: Results from solar calculator
             country_plugin: Name of applied country plugin
             timeout_seconds: Max time to wait for Gemini (default 8s)
-        
+
         Returns:
             Structured narrative with summary, analysis, and recommendations
         """
@@ -100,7 +100,7 @@ class AIConsultant:
             return self._generate_fallback_narrative(calculation_data)
 
         import asyncio
-        
+
         try:
             # Run Gemini with timeout
             result = await asyncio.wait_for(
@@ -108,18 +108,18 @@ class AIConsultant:
                 timeout=timeout_seconds,
             )
             return result
-            
-        except asyncio.TimeoutError:
+
+        except TimeoutError:
             logger.warning(f"Gemini timed out after {timeout_seconds}s, using fallback")
             return self._generate_fallback_narrative(calculation_data)
         except Exception as e:
             logger.error(f"Gemini error: {e}")
             return self._generate_fallback_narrative(calculation_data)
-    
+
     async def _call_gemini(
         self,
         calculation_data: dict[str, Any],
-        country_plugin: Optional[str],
+        country_plugin: str | None,
     ) -> dict[str, Any]:
         """Internal method to call Gemini API."""
         # Extract location details for richer context
@@ -127,7 +127,7 @@ class AIConsultant:
         lat = location.get("lat", 0)
         lon = location.get("lon", 0)
         country_code = location.get("country_code", "")
-        
+
         # Prepare context for Gemini with enriched location data
         context = json.dumps({
             "calculation_data": calculation_data,
@@ -156,12 +156,12 @@ class AIConsultant:
 
         # Parse response
         result = json.loads(response.text)
-        
+
         # Validate narrative against calculations
         if not self._validate_narrative(calculation_data, result):
             logger.warning("Narrative validation failed, using fallback")
             return self._generate_fallback_narrative(calculation_data)
-        
+
         return result
 
     def _validate_narrative(
@@ -171,32 +171,32 @@ class AIConsultant:
     ) -> bool:
         """
         Validate that AI narrative is coherent with calculations.
-        
+
         Checks for:
         - Major discrepancies in kWh values (hallucination detection)
         - Presence of location_insights with minimum content length
         """
         try:
             import re
-            
+
             summary = narrative.get("summary", "")
             actual_kwh = calc_data.get("annual_generation_kwh", 0)
-            
+
             # Check if any mentioned kWh values are wildly off
             numbers = re.findall(r"[\d,]+(?:\.\d+)?\s*kWh", summary)
-            
+
             for num_str in numbers:
                 mentioned = float(num_str.replace(",", "").replace("kWh", "").strip())
                 if actual_kwh > 0 and abs(mentioned - actual_kwh) / actual_kwh > 0.10:  # 10% tolerance
                     logger.warning(f"Narrative mismatch: {mentioned} vs {actual_kwh}")
                     return False
-            
+
             # Validate location_insights exist and have minimum content
             insights = narrative.get("location_insights", [])
             if len(insights) < 2:
                 logger.warning(f"Insufficient location_insights: {len(insights)} < 2")
                 return False
-            
+
             for i, insight in enumerate(insights):
                 content = insight.get("content", "")
                 word_count = len(content.split())
@@ -206,9 +206,9 @@ class AIConsultant:
                 if not insight.get("title") or not insight.get("source"):
                     logger.warning(f"Insight {i} missing title or source")
                     return False
-            
+
             return True
-            
+
         except Exception as e:
             logger.warning(f"Validation error (allowing): {e}")
             return True  # Don't block on validation errors
@@ -225,31 +225,31 @@ class AIConsultant:
         efficiency = calc_data.get("efficiency_vs_optimal", 1.0)
         location = calc_data.get("location", {})
         lat = location.get("lat", 0)
-        
+
         peak_month = peak.get("month", "verano")
         worst_month = worst.get("month", "invierno")
-        
+
         # CONCISE summary (max 30 words)
         summary = f"Potencial: {annual:,.0f} kWh/año. Pico en {peak_month}, mínimo en {worst_month}."
-        
+
         # CONCISE seasonal (max 40 words)
         seasonal = (
             f"Máximo en {peak_month} ({peak.get('kwh', 0):,.0f} kWh), "
             f"mínimo en {worst_month} ({worst.get('kwh', 0):,.0f} kWh)."
         )
-        
+
         # CONCISE recommendations (max 20 words)
         if efficiency < 0.95:
             recommendations = f"Captando {efficiency*100:.0f}% del óptimo. Ajusta inclinación para mejorar."
         else:
             recommendations = "Configuración óptima para tu ubicación."
-        
+
         # CONCISE confidence note
         confidence = "Estimación basada en promedios regionales." if data_tier == "standard" else None
-        
+
         # Generate CONCISE location insights
         location_insights = self._generate_fallback_location_insights(lat, annual)
-        
+
         return {
             "summary": summary,
             "seasonal_analysis": seasonal,
@@ -266,7 +266,7 @@ class AIConsultant:
     ) -> list[dict[str, str]]:
         """Generate CONCISE location insights (20-30 words each)."""
         insights = []
-        
+
         # Insight 1: Solar resource based on latitude (CONCISE)
         if abs(lat) < 25:
             solar_context = "Zona tropical con >2.000 kWh/m²/año. Producción estable todo el año gracias a ángulos solares favorables."
@@ -277,13 +277,13 @@ class AIConsultant:
         else:
             solar_context = "Latitud alta con estacionalidad extrema. Veranos productivos, inviernos limitados. <1.200 kWh/m²/año."
             solar_source = "PVGIS High-Lat"
-        
+
         insights.append({
             "title": "Recurso solar",
             "content": solar_context,
             "source": solar_source,
         })
-        
+
         # Insight 2: Climate patterns (CONCISE)
         if annual_kwh > 6000:
             climate_context = "Clima soleado, <60 días lluvia/año, >2.500h sol. Baja humedad favorece rendimiento."
@@ -291,13 +291,13 @@ class AIConsultant:
             climate_context = "Clima mixto, 80-120 días lluvia/año, ~2.200h sol. Temperaturas moderadas optimizan eficiencia."
         else:
             climate_context = "Nubosidad frecuente, >130 días nublados/año. Paneles modernos captan radiación difusa eficientemente."
-        
+
         insights.append({
             "title": "Clima local",
             "content": climate_context,
             "source": "PVGIS-TMY",
         })
-        
+
         return insights
 
 

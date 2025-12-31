@@ -5,12 +5,12 @@ Provides access to historical solar analyses for authenticated API users.
 """
 
 import logging
-from datetime import date, datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, date, datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from pydantic import BaseModel, Field
-from sqlalchemy import select, func, and_
+from pydantic import BaseModel
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -34,13 +34,13 @@ class AnalysisSummary(BaseModel):
     latitude: float
     longitude: float
     area_m2: float
-    tilt: Optional[float]
-    orientation: Optional[str]
-    annual_generation_kwh: Optional[float]
+    tilt: float | None
+    orientation: str | None
+    annual_generation_kwh: float | None
     data_tier: str
     confidence_score: float
     status: str
-    country_code: Optional[str]
+    country_code: str | None
     created_at: str
 
     class Config:
@@ -50,12 +50,12 @@ class AnalysisSummary(BaseModel):
 class AnalysisDetail(AnalysisSummary):
     """Full details of a solar analysis."""
 
-    monthly_breakdown: Optional[dict[str, float]]
-    peak_month: Optional[str]
-    worst_month: Optional[str]
-    ai_insights: Optional[dict[str, Any]]
-    applied_plugin: Optional[str]
-    error_message: Optional[str]
+    monthly_breakdown: dict[str, float] | None
+    peak_month: str | None
+    worst_month: str | None
+    ai_insights: dict[str, Any] | None
+    applied_plugin: str | None
+    error_message: str | None
     updated_at: str
 
 
@@ -75,8 +75,8 @@ class AnalysesStatsResponse(BaseModel):
     successful_analyses: int
     failed_analyses: int
     pending_analyses: int
-    avg_generation_kwh: Optional[float]
-    most_common_country: Optional[str]
+    avg_generation_kwh: float | None
+    most_common_country: str | None
     analyses_last_24h: int
     analyses_last_7d: int
 
@@ -113,18 +113,18 @@ async def get_current_api_key(
 async def list_analyses(
     limit: int = Query(20, ge=1, le=100, description="Max items per page"),
     offset: int = Query(0, ge=0, description="Items to skip"),
-    from_date: Optional[date] = Query(None, description="Filter from date (YYYY-MM-DD)"),
-    to_date: Optional[date] = Query(None, description="Filter to date (YYYY-MM-DD)"),
-    status: Optional[str] = Query(
+    from_date: date | None = Query(None, description="Filter from date (YYYY-MM-DD)"),  # noqa: B008
+    to_date: date | None = Query(None, description="Filter to date (YYYY-MM-DD)"),  # noqa: B008
+    status: str | None = Query(  # noqa: B008
         None,
         description="Filter by status",
         pattern="^(pending|processing|complete|error)$",
     ),
-    lat: Optional[float] = Query(None, ge=-90, le=90, description="Center latitude for geo filter"),
-    lon: Optional[float] = Query(None, ge=-180, le=180, description="Center longitude for geo filter"),
+    lat: float | None = Query(None, ge=-90, le=90, description="Center latitude for geo filter"),  # noqa: B008
+    lon: float | None = Query(None, ge=-180, le=180, description="Center longitude for geo filter"),  # noqa: B008
     radius_km: float = Query(10, ge=1, le=100, description="Search radius in km"),
-    db: AsyncSession = Depends(get_db),
-    api_key: dict[str, Any] = Depends(get_current_api_key),
+    db: AsyncSession = Depends(get_db),  # noqa: B008
+    api_key: dict[str, Any] = Depends(get_current_api_key),  # noqa: B008
 ) -> PaginatedAnalysesResponse:
     """
     List analyses for the current API key.
@@ -204,8 +204,8 @@ async def list_analyses(
 
 @router.get("/stats", response_model=AnalysesStatsResponse)
 async def get_analyses_stats(
-    db: AsyncSession = Depends(get_db),
-    api_key: dict[str, Any] = Depends(get_current_api_key),
+    db: AsyncSession = Depends(get_db),  # noqa: B008
+    api_key: dict[str, Any] = Depends(get_current_api_key),  # noqa: B008
 ) -> AnalysesStatsResponse:
     """
     Get statistics about your analyses.
@@ -217,7 +217,7 @@ async def get_analyses_stats(
     - Recent activity
     """
     api_key_id = api_key.get("id")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Total count
     total_result = await db.execute(
@@ -298,8 +298,8 @@ async def get_analyses_stats(
 @router.get("/{request_id}", response_model=AnalysisDetail)
 async def get_analysis(
     request_id: str,
-    db: AsyncSession = Depends(get_db),
-    api_key: dict[str, Any] = Depends(get_current_api_key),
+    db: AsyncSession = Depends(get_db),  # noqa: B008
+    api_key: dict[str, Any] = Depends(get_current_api_key),  # noqa: B008
 ) -> AnalysisDetail:
     """
     Get detailed information about a specific analysis.

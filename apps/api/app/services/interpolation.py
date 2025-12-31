@@ -8,9 +8,7 @@ enabling <200ms interactive updates without external API calls.
 import json
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol, runtime_checkable
-
-import numpy as np
+from typing import Any, Protocol, runtime_checkable
 
 from app.services.solar_calculator import SolarCalculator
 
@@ -31,7 +29,7 @@ class SolarDataProtocol(Protocol):
 class InterpolationModel:
     """
     Pre-computed interpolation model for a geographic location.
-    
+
     Contains a 3D response matrix: [tilts × orientations × months]
     that enables instant calculation for any tilt/orientation combination.
     """
@@ -60,32 +58,32 @@ class InterpolationModel:
     def interpolate(self, tilt: float, orientation: float) -> dict[str, Any]:
         """
         Interpolate generation values for given tilt/orientation.
-        
+
         Uses bilinear interpolation for smooth transitions.
-        
+
         Args:
             tilt: Panel tilt in degrees (0-90)
             orientation: Panel orientation in degrees (0-360)
-        
+
         Returns:
             Dictionary with annual and monthly generation values
         """
         # Find surrounding indices
         tilt_idx, tilt_frac = self._find_index(tilt, self.tilts)
         orient_idx, orient_frac = self._find_index(orientation, self.orientations)
-        
+
         # Get adjacent indices (with wraparound for orientation)
         t0, t1 = tilt_idx, min(tilt_idx + 1, len(self.tilts) - 1)
         o0, o1 = orient_idx, (orient_idx + 1) % len(self.orientations)
-        
+
         # Bilinear interpolation for annual value
         v00 = self.annual_values[t0][o0]
         v01 = self.annual_values[t0][o1]
         v10 = self.annual_values[t1][o0]
         v11 = self.annual_values[t1][o1]
-        
+
         annual = self._bilinear(v00, v01, v10, v11, tilt_frac, orient_frac)
-        
+
         # Interpolate monthly values
         month_names = [
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -98,11 +96,11 @@ class InterpolationModel:
             m10 = self.monthly_values[t1][o0][m_idx]
             m11 = self.monthly_values[t1][o1][m_idx]
             monthly[month] = self._bilinear(m00, m01, m10, m11, tilt_frac, orient_frac)
-        
+
         # Find peak/worst months
         peak_month = max(monthly, key=monthly.get)  # type: ignore
         worst_month = min(monthly, key=monthly.get)  # type: ignore
-        
+
         return {
             "annual_generation_kwh": round(annual, 1),
             "monthly_breakdown": {k: round(v, 1) for k, v in monthly.items()},
@@ -183,46 +181,46 @@ def generate_interpolation_model(
 ) -> InterpolationModel:
     """
     Generate interpolation model from solar radiation data.
-    
+
     Pre-computes generation values for all tilt/orientation combinations.
-    
+
     Args:
         solar_data: Raw solar radiation data from Copernicus
         area_m2: Panel area in square meters
         panel_efficiency: Panel efficiency (0.18-0.25)
         tilt_step: Step size for tilt grid (degrees)
         orientation_step: Step size for orientation grid (degrees)
-    
+
     Returns:
         InterpolationModel ready for caching and interpolation
     """
     calculator = SolarCalculator(panel_efficiency=panel_efficiency)
-    
+
     # Define grid
     tilts = list(range(0, 91, tilt_step))  # 0, 5, 10, ... 90
     orientations = list(range(0, 360, orientation_step))  # 0, 15, 30, ... 345
-    
+
     logger.info(
         f"Generating interpolation model: {len(tilts)}x{len(orientations)} grid"
     )
-    
+
     # Pre-compute all values
     monthly_values: list[list[list[float]]] = []
     annual_values: list[list[float]] = []
-    
+
     optimal_tilt = calculator.get_optimal_tilt(solar_data.latitude)
     optimal_orientation = calculator.get_optimal_orientation(solar_data.latitude)
-    
+
     for tilt in tilts:
         tilt_monthly: list[list[float]] = []
         tilt_annual: list[float] = []
-        
+
         for orient in orientations:
             # Calculate monthly generation
             monthly = calculator.calculate_monthly_generation(
                 solar_data, area_m2, tilt, orient
             )
-            
+
             # Store monthly values as list
             month_values = [
                 monthly.get(m, 0)
@@ -233,10 +231,10 @@ def generate_interpolation_model(
             ]
             tilt_monthly.append(month_values)
             tilt_annual.append(sum(month_values))
-        
+
         monthly_values.append(tilt_monthly)
         annual_values.append(tilt_annual)
-    
+
     # Find optimal values
     optimal_tilt_idx = tilts.index(
         min(tilts, key=lambda t: abs(t - optimal_tilt))
@@ -245,7 +243,7 @@ def generate_interpolation_model(
         min(orientations, key=lambda o: abs(o - optimal_orientation))
     )
     optimal_annual_kwh = annual_values[optimal_tilt_idx][optimal_orient_idx]
-    
+
     return InterpolationModel(
         latitude=solar_data.latitude,
         longitude=solar_data.longitude,

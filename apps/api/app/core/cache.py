@@ -9,9 +9,9 @@ Uses Upstash Redis REST API for serverless-friendly caching.
 """
 
 import json
-import time
 import logging
-from typing import Any, Optional
+import time
+from typing import Any
 
 from app.core.config import settings
 from app.core.metrics import log_cache_operation, metrics
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class CacheManager:
     """
     Redis cache manager for storing and retrieving solar data.
-    
+
     Features:
     - Serverless-friendly (Upstash Redis REST API)
     - Configurable TTL per cache type
@@ -31,7 +31,7 @@ class CacheManager:
     """
 
     def __init__(self) -> None:
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
         self._initialized = False
 
     @property
@@ -68,23 +68,23 @@ class CacheManager:
             logger.error(f"Redis initialization failed: {e}")
             self._initialized = False
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """
         Get a value from cache.
-        
+
         Records metrics for monitoring cache hit rate.
         """
         if not self._initialized or not self._client:
             return None
-        
+
         start_time = time.perf_counter()
         try:
             result = self._client.get(key)
             latency_ms = (time.perf_counter() - start_time) * 1000
-            
+
             hit = result is not None
             log_cache_operation("redis", "get", key, hit, latency_ms)
-            
+
             return result
         except Exception as e:
             logger.error(f"Cache get error for key '{key[:50]}': {e}")
@@ -95,11 +95,11 @@ class CacheManager:
         self,
         key: str,
         value: str,
-        ex: Optional[int] = None,
+        ex: int | None = None,
     ) -> bool:
         """
         Set a value in cache with TTL.
-        
+
         Args:
             key: Cache key
             value: Value to cache
@@ -107,15 +107,15 @@ class CacheManager:
         """
         if not self._initialized or not self._client:
             return False
-        
+
         if ex is None:
             ex = settings.REDIS_TTL_SECONDS
-        
+
         start_time = time.perf_counter()
         try:
             self._client.setex(key, ex, value)
             latency_ms = (time.perf_counter() - start_time) * 1000
-            
+
             logger.debug(
                 f"Cache SET: key={key[:50]} ttl={ex}s latency={latency_ms:.2f}ms"
             )
@@ -157,18 +157,18 @@ class CacheManager:
             return -1
 
     def _make_cache_key(
-        self, 
-        lat: float, 
-        lon: float, 
+        self,
+        lat: float,
+        lon: float,
         precision: int = 2,
         prefix: str = "solar",
     ) -> str:
         """
         Create a cache key from coordinates.
-        
+
         Rounds coordinates to specified precision to enable cache hits
         for nearby locations (effectively creating a grid).
-        
+
         Args:
             lat: Latitude (-90 to 90)
             lon: Longitude (-180 to 180)
@@ -176,7 +176,7 @@ class CacheManager:
                 - 2 = ~1.11km grid at equator
                 - 1 = ~11.1km grid at equator
             prefix: Cache key prefix for namespacing
-        
+
         Returns:
             Cache key string
         """
@@ -222,17 +222,17 @@ async def get_cached_model(
     lat: float,
     lon: float,
     radius_km: float = 5.0,
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """
     Get cached interpolation model for a location.
-    
+
     Uses coordinate rounding to find cache hits within approximate radius.
-    
+
     Args:
         lat: Latitude
         lon: Longitude
         radius_km: Search radius (approximated by rounding precision)
-    
+
     Returns:
         Cached interpolation model or None
     """
@@ -240,17 +240,17 @@ async def get_cached_model(
     # precision 2 ≈ 1.11km at equator
     # precision 1 ≈ 11.1km at equator
     precision = 2 if radius_km <= 5 else 1
-    
+
     cache_key = cache._make_cache_key(lat, lon, precision, prefix="model")
     cached = await cache.get(cache_key)
-    
+
     if cached:
         try:
             return json.loads(cached)
         except json.JSONDecodeError:
             logger.warning(f"Invalid JSON in cache for key: {cache_key}")
             return None
-    
+
     return None
 
 
@@ -258,27 +258,27 @@ async def set_cached_model(
     lat: float,
     lon: float,
     model: dict[str, Any],
-    ttl_days: Optional[int] = None,
+    ttl_days: int | None = None,
 ) -> bool:
     """
     Cache an interpolation model for a location.
-    
+
     Args:
         lat: Latitude
         lon: Longitude
         model: Interpolation model data
         ttl_days: Cache TTL in days (default from settings)
-    
+
     Returns:
         True if cached successfully
     """
     if ttl_days is None:
         ttl_days = settings.DB_CACHE_TTL_DAYS
-    
+
     cache_key = cache._make_cache_key(lat, lon, precision=2, prefix="model")
     model_json = json.dumps(model)
     ttl_seconds = ttl_days * 86400
-    
+
     return await cache.set(cache_key, model_json, ex=ttl_seconds)
 
 
@@ -286,17 +286,17 @@ async def get_cached_solar_data(
     lat: float,
     lon: float,
     year: int,
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Get cached solar radiation data."""
     cache_key = make_solar_key(lat, lon, year)
     cached = await cache.get(cache_key)
-    
+
     if cached:
         try:
             return json.loads(cached)
         except json.JSONDecodeError:
             return None
-    
+
     return None
 
 
@@ -305,15 +305,15 @@ async def set_cached_solar_data(
     lon: float,
     year: int,
     data: dict[str, Any],
-    ttl_seconds: Optional[int] = None,
+    ttl_seconds: int | None = None,
 ) -> bool:
     """Cache solar radiation data."""
     if ttl_seconds is None:
         ttl_seconds = settings.REDIS_TTL_SECONDS
-    
+
     cache_key = make_solar_key(lat, lon, year)
     data_json = json.dumps(data, default=str)
-    
+
     return await cache.set(cache_key, data_json, ex=ttl_seconds)
 
 

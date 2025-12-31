@@ -6,7 +6,7 @@ Each endpoint validates the CRON_SECRET before executing.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
@@ -36,7 +36,7 @@ class HealthCheckResponse(BaseModel):
 
 
 async def verify_cron_secret(
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ) -> bool:
     """
     Verify the cron secret from Authorization header.
@@ -72,7 +72,7 @@ async def verify_cron_secret(
 
 @router.get("/cleanup", response_model=CleanupResponse)
 async def cron_cleanup(
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ) -> CleanupResponse:
     """
     Cleanup expired cache entries.
@@ -104,6 +104,7 @@ async def cron_cleanup(
 
     try:
         from sqlalchemy import text
+
         from app.core.database import db
 
         expired_locations = 0
@@ -151,12 +152,12 @@ async def cron_cleanup(
         raise HTTPException(
             status_code=500,
             detail=f"Cleanup failed: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/health", response_model=HealthCheckResponse)
 async def cron_health(
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ) -> HealthCheckResponse:
     """
     Health check endpoint for cron monitoring.
@@ -173,7 +174,7 @@ async def cron_health(
 
 @router.get("/cache-stats")
 async def get_cache_stats(
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ) -> dict[str, Any]:
     """
     Get current cache statistics.
@@ -197,5 +198,5 @@ async def get_cache_stats(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get cache stats: {str(e)}",
-        )
+        ) from e
 

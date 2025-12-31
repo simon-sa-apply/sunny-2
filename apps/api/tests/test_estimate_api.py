@@ -24,10 +24,10 @@ def test_estimate_endpoint(client: TestClient) -> None:
             "orientation": "N",
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     # Check required fields
     assert "annual_generation_kwh" in data
     assert "monthly_breakdown" in data
@@ -36,7 +36,7 @@ def test_estimate_endpoint(client: TestClient) -> None:
     assert "location" in data
     assert "confidence_score" in data
     assert "request_id" in data
-    
+
     # Check values are reasonable
     assert data["annual_generation_kwh"] > 0
     assert len(data["monthly_breakdown"]) == 12
@@ -54,10 +54,10 @@ def test_estimate_with_auto_orientation(client: TestClient) -> None:
             "orientation": "auto",
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     # Should use optimal orientation
     assert data["optimization"]["efficiency_vs_optimal"] >= 0.99
 
@@ -72,7 +72,7 @@ def test_estimate_response_headers(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     assert response.status_code == 200
     assert "X-Data-Tier" in response.headers
     assert "X-Confidence-Score" in response.headers
@@ -89,10 +89,10 @@ def test_estimate_chile_plugin(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["location"]["country_code"] == "CL"
     assert "Ley 21.118" in data["applied_plugin"]
     assert data["savings"] is not None
@@ -109,10 +109,10 @@ def test_estimate_germany_plugin(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["location"]["country_code"] == "DE"
     assert "EEG" in data["applied_plugin"]
     assert data["savings"]["currency"] == "USD"
@@ -128,7 +128,7 @@ def test_estimate_validation_error(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     assert response.status_code == 422  # Validation error
 
 
@@ -143,10 +143,10 @@ def test_estimate_with_custom_price(client: TestClient) -> None:
             "electricity_price": 200.0,  # Custom CLP price
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     assert data["savings"]["price_per_kwh"] == 200.0
 
 
@@ -161,7 +161,7 @@ def test_interpolate_endpoint(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     # Then test interpolation
     response = client.post(
         "/api/v1/interpolate",
@@ -173,10 +173,10 @@ def test_interpolate_endpoint(client: TestClient) -> None:
             "area_m2": 15.0,
         },
     )
-    
+
     assert response.status_code == 200
     data = response.json()
-    
+
     assert "annual_generation_kwh" in data
     assert "monthly_breakdown" in data
 

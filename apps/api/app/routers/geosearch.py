@@ -1,10 +1,9 @@
 """Geosearch API endpoint for location lookup."""
 
 import logging
-from typing import Optional
 
-from fastapi import APIRouter, Query
 import httpx
+from fastapi import APIRouter, Query
 
 from app.core.cache import cache
 
@@ -24,7 +23,7 @@ async def search_location(
 ) -> list[dict]:
     """
     Search for locations using OpenStreetMap Nominatim.
-    
+
     Returns array of suggestions with name, lat, lon, and country.
     Results are cached for 7 days.
     """
@@ -34,7 +33,7 @@ async def search_location(
     if cached:
         import json
         return json.loads(cached)
-    
+
     # Query Nominatim
     try:
         async with httpx.AsyncClient() as client:
@@ -57,7 +56,7 @@ async def search_location(
         logger.error(f"Nominatim error: {e}")
         # Return mock data for demo
         return _get_mock_results(q)
-    
+
     # Transform results
     results = []
     for item in data[:limit]:
@@ -69,12 +68,12 @@ async def search_location(
             "country_code": item.get("address", {}).get("country_code", "").upper(),
             "type": item.get("type", ""),
         })
-    
+
     # Cache results (7 days)
     if results and cache.is_configured:
         import json
         await cache.set(cache_key, json.dumps(results), ex=604800)
-    
+
     return results
 
 
@@ -106,12 +105,12 @@ def _get_mock_results(query: str) -> list[dict]:
             "type": "city",
         }],
     }
-    
+
     query_lower = query.lower()
     for key, results in mock_data.items():
         if key in query_lower:
             return results
-    
+
     return [{
         "name": f"Search result for: {query}",
         "lat": 0.0,

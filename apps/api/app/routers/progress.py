@@ -3,9 +3,9 @@
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def clear_progress(request_id: str) -> None:
 async def stream_progress(request_id: str) -> StreamingResponse:
     """
     Stream progress updates via SSE.
-    
+
     Events emitted:
     - connecting: Initial connection established
     - fetching_data: Fetching data from Copernicus
@@ -60,35 +60,35 @@ async def stream_progress(request_id: str) -> StreamingResponse:
         try:
             # Initial connection event
             yield f"event: connecting\ndata: {json.dumps({'status': 'connecting', 'progress_percent': 0, 'message': 'Conectando...'})}\n\n"
-            
+
             timeout_counter = 0
             max_timeout = 300  # 5 minutes
-            
+
             while timeout_counter < max_timeout:
                 progress = get_progress(request_id)
-                
+
                 yield f"data: {json.dumps(progress)}\n\n"
-                
+
                 if progress["status"] == "complete":
                     yield f"event: complete\ndata: {json.dumps(progress)}\n\n"
                     clear_progress(request_id)
                     break
-                
+
                 if progress["status"] == "error":
                     yield f"event: error\ndata: {json.dumps(progress)}\n\n"
                     clear_progress(request_id)
                     break
-                
+
                 await asyncio.sleep(0.5)
                 timeout_counter += 0.5
-            
+
             if timeout_counter >= max_timeout:
                 yield f"event: timeout\ndata: {json.dumps({'status': 'timeout', 'message': 'Request timed out'})}\n\n"
-                
+
         except asyncio.CancelledError:
             logger.info(f"SSE connection cancelled for {request_id}")
             raise
-    
+
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream",
@@ -111,7 +111,7 @@ async def simulate_progress(request_id: str) -> None:
         ("generating_insights", 90, "Preparando análisis..."),
         ("complete", 100, "¡Análisis completado!"),
     ]
-    
+
     for status, percent, message in stages:
         update_progress(request_id, status, percent, message)
         await asyncio.sleep(0.5)

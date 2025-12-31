@@ -1,6 +1,7 @@
 """Schemas for solar estimation API."""
 
-from typing import Any, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -10,24 +11,24 @@ class EstimateRequest(BaseModel):
     lat: float = Field(..., ge=-90, le=90, description="Latitude")
     lon: float = Field(..., ge=-180, le=180, description="Longitude")
     area_m2: float = Field(..., gt=0, le=10000, description="Panel area in m²")
-    tilt: Optional[float] = Field(
+    tilt: float | None = Field(
         default=None,
         ge=0,
         le=90,
         description="Panel tilt in degrees (optional, uses optimal if not provided)",
     )
-    orientation: Optional[str] = Field(
+    orientation: str | None = Field(
         default=None,
         pattern="^(N|S|E|W|NE|NW|SE|SW|auto)$",
         description="Cardinal orientation or 'auto' for optimal",
     )
-    panel_efficiency: Optional[float] = Field(
+    panel_efficiency: float | None = Field(
         default=0.22,
         ge=0.10,
         le=0.30,
         description="Panel efficiency (0.18-0.25 for modern panels)",
     )
-    electricity_price: Optional[float] = Field(
+    electricity_price: float | None = Field(
         default=None,
         gt=0,
         description="Local electricity price per kWh (for savings calculation)",
@@ -55,7 +56,7 @@ class LocationInfo(BaseModel):
 
     lat: float
     lon: float
-    country_code: Optional[str] = None
+    country_code: str | None = None
     data_tier: str
 
 
@@ -96,7 +97,7 @@ class SavingsInfo(BaseModel):
     currency_symbol: str
     price_per_kwh: float
     co2_savings_kg: float
-    advisory: Optional[str] = None
+    advisory: str | None = None
 
 
 class EstimateResponse(BaseModel):
@@ -117,13 +118,13 @@ class EstimateResponse(BaseModel):
     optimization: OptimizationInfo
 
     # Economic calculations
-    savings: Optional[SavingsInfo] = None
+    savings: SavingsInfo | None = None
 
     # Applied regulatory plugin
-    applied_plugin: Optional[str] = None
+    applied_plugin: str | None = None
 
     # AI insights (null for now, filled by Gemini later)
-    ai_insights: Optional[dict[str, Any]] = None
+    ai_insights: dict[str, Any] | None = None
 
     # Request metadata
     request_id: str

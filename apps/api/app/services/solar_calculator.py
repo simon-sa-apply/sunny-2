@@ -10,11 +10,10 @@ References:
 """
 
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Optional, Protocol, runtime_checkable
+from dataclasses import dataclass
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +76,7 @@ class SolarEstimate:
     # Additional analysis
     capacity_factor: float = 0.0
     performance_ratio: float = 0.0
-    
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -111,7 +110,7 @@ class SolarEstimate:
 class SolarCalculator:
     """
     Solar generation calculator.
-    
+
     Calculates potential solar energy generation based on location,
     panel parameters, and irradiance data.
     """
@@ -134,7 +133,7 @@ class SolarCalculator:
     ) -> None:
         self.panel_efficiency = panel_efficiency
 
-    def orientation_to_degrees(self, orientation: Optional[str]) -> float:
+    def orientation_to_degrees(self, orientation: str | None) -> float:
         """Convert cardinal orientation to degrees."""
         if orientation is None:
             return 180  # Default to South (optimal for Northern hemisphere)
@@ -143,24 +142,24 @@ class SolarCalculator:
     def get_optimal_tilt(self, latitude: float) -> float:
         """
         Calculate optimal panel tilt for maximum annual generation.
-        
+
         Rule of thumb: optimal tilt ≈ latitude for annual optimization.
         Adjusted slightly for specific hemisphere considerations.
         """
         # Optimal tilt is approximately equal to latitude
         optimal = abs(latitude)
-        
+
         # Slight adjustment based on typical use patterns
         # Summer optimization: subtract 10-15 degrees
         # Winter optimization: add 10-15 degrees
         # Annual average: use latitude
-        
+
         return min(max(optimal, 0), 90)
 
     def get_optimal_orientation(self, latitude: float) -> float:
         """
         Get optimal panel orientation for location.
-        
+
         Returns:
             Orientation in degrees from North (0=N, 180=S)
         """
@@ -176,22 +175,22 @@ class SolarCalculator:
     ) -> float:
         """
         Calculate efficiency factor based on tilt and orientation vs optimal.
-        
+
         Uses simplified geometric model for panel efficiency.
         """
         optimal_tilt = self.get_optimal_tilt(latitude)
         optimal_orientation = self.get_optimal_orientation(latitude)
-        
+
         # Tilt deviation penalty (max ~30% loss for 90° off optimal)
         tilt_diff = abs(tilt - optimal_tilt)
         tilt_factor = np.cos(np.radians(tilt_diff * 0.9))
-        
+
         # Orientation deviation penalty
         orientation_diff = abs(orientation - optimal_orientation)
         if orientation_diff > 180:
             orientation_diff = 360 - orientation_diff
         orientation_factor = np.cos(np.radians(orientation_diff * 0.5))
-        
+
         # Combined factor (multiplicative)
         return float(max(0.5, tilt_factor * orientation_factor))
 
@@ -204,24 +203,24 @@ class SolarCalculator:
     ) -> dict[str, float]:
         """
         Calculate monthly generation from radiation data.
-        
+
         Args:
             solar_data: Solar radiation data from Copernicus
             area_m2: Panel area in square meters
             tilt: Panel tilt in degrees
             orientation: Panel orientation in degrees from North
-        
+
         Returns:
             Dictionary of monthly generation in kWh
         """
         # Get monthly GHI
         monthly_ghi = solar_data.monthly_ghi
-        
+
         # Calculate adjustment factor for tilt/orientation
         tilt_factor = self.calculate_tilt_factor(
             tilt, orientation, solar_data.latitude
         )
-        
+
         # System efficiency factors
         system_efficiency = (
             self.panel_efficiency
@@ -229,81 +228,81 @@ class SolarCalculator:
             * (1 - WIRING_LOSSES)
             * (1 - SOILING_LOSSES)
         )
-        
+
         # Calculate generation for each month
         monthly_generation = {}
         for month, ghi_kwh_m2 in monthly_ghi.items():
             # Generation = GHI * Area * Tilt Factor * System Efficiency
             generation = ghi_kwh_m2 * area_m2 * tilt_factor * system_efficiency
             monthly_generation[month] = generation
-        
+
         return monthly_generation
 
     def calculate(
         self,
         solar_data: SolarDataProtocol,
         area_m2: float,
-        tilt: Optional[float] = None,
-        orientation: Optional[str] = None,
+        tilt: float | None = None,
+        orientation: str | None = None,
     ) -> SolarEstimate:
         """
         Calculate solar generation potential.
-        
+
         Args:
             solar_data: Solar radiation data from Copernicus
             area_m2: Panel area in square meters
             tilt: Panel tilt in degrees (optional, uses optimal if None)
             orientation: Cardinal direction (N/S/E/W/NE/etc) or None for optimal
-        
+
         Returns:
             SolarEstimate with full calculation results
         """
         lat = solar_data.latitude
         lon = solar_data.longitude
-        
+
         # Determine tilt and orientation
         optimal_tilt = self.get_optimal_tilt(lat)
         optimal_orientation = self.get_optimal_orientation(lat)
-        
+
         actual_tilt = tilt if tilt is not None else optimal_tilt
         actual_orientation = (
             self.orientation_to_degrees(orientation)
             if orientation
             else optimal_orientation
         )
-        
+
         # Calculate monthly generation for actual parameters
         monthly = self.calculate_monthly_generation(
             solar_data, area_m2, actual_tilt, actual_orientation
         )
-        
+
         # Calculate optimal generation for comparison
         optimal_monthly = self.calculate_monthly_generation(
             solar_data, area_m2, optimal_tilt, optimal_orientation
         )
         optimal_annual = sum(optimal_monthly.values())
-        
+
         # Find peak and worst months
         peak_month = max(monthly, key=monthly.get)  # type: ignore
         worst_month = min(monthly, key=monthly.get)  # type: ignore
-        
+
         annual_kwh = sum(monthly.values())
         efficiency = annual_kwh / optimal_annual if optimal_annual > 0 else 0
-        
+
         # Calculate performance metrics
         # Capacity factor: actual generation / theoretical max
         theoretical_max = area_m2 * self.panel_efficiency * 8760 * 0.25  # 25% avg sunlight
         capacity_factor = annual_kwh / theoretical_max if theoretical_max > 0 else 0
-        
+
         # Performance ratio: actual / expected based on irradiance
         expected = solar_data.annual_ghi_kwh_m2 * area_m2 * self.panel_efficiency
         performance_ratio = annual_kwh / expected if expected > 0 else 0
-        
+
         # Confidence score based on data tier and location
         confidence = 0.9 if solar_data.data_tier == "engineering" else 0.75
         if abs(lat) > 50:
             confidence *= 0.9  # Reduce confidence for high latitudes
-        
+
         return SolarEstimate(
             latitude=lat,
             longitude=lon,

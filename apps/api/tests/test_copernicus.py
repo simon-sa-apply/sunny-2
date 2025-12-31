@@ -16,7 +16,7 @@ async def test_fetch_mock_data(copernicus: CopernicusService) -> None:
     """Test fetching mock solar radiation data."""
     # Santiago, Chile
     data = await copernicus.fetch_solar_radiation(-33.45, -70.65, 2023)
-    
+
     assert isinstance(data, SolarRadiationData)
     assert data.latitude == -33.45
     assert data.longitude == -70.65
@@ -30,7 +30,7 @@ async def test_fetch_mock_data(copernicus: CopernicusService) -> None:
 async def test_monthly_ghi(copernicus: CopernicusService) -> None:
     """Test monthly GHI calculation."""
     data = await copernicus.fetch_solar_radiation(-33.45, -70.65, 2023)
-    
+
     monthly = data.monthly_ghi
     assert len(monthly) == 12
     assert "Jan" in monthly
@@ -42,11 +42,11 @@ def test_coordinate_validation(copernicus: CopernicusService) -> None:
     """Test coordinate validation."""
     # Valid coordinates
     copernicus._validate_coordinates(45.0, 90.0)
-    
+
     # Invalid latitude
     with pytest.raises(ValueError, match="out of range"):
         copernicus._validate_coordinates(100.0, 0.0)
-    
+
     # High latitude warning (outside CAMS coverage)
     with pytest.raises(ValueError, match="outside CAMS coverage"):
         copernicus._validate_coordinates(70.0, 0.0)
@@ -55,7 +55,7 @@ def test_coordinate_validation(copernicus: CopernicusService) -> None:
 def test_request_params(copernicus: CopernicusService) -> None:
     """Test request parameter building."""
     params = copernicus._build_request_params(-33.45, -70.65, 2023)
-    
+
     assert params["sky_type"] == "observed_cloud"
     assert params["location"]["latitude"] == -33.45
     assert params["location"]["longitude"] == -70.65

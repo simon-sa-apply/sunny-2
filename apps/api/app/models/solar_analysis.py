@@ -1,7 +1,7 @@
 """Solar analysis and cached location models."""
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import Float, Index, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
@@ -22,7 +22,7 @@ except ImportError:
 class CachedLocation(Base):
     """
     Cached solar data for a geographic location.
-    
+
     Stores the interpolation model for quick retrieval of solar calculations
     at any tilt/orientation combination without re-calling Copernicus API.
     """
@@ -37,7 +37,7 @@ class CachedLocation(Base):
             nullable=True,
             index=True,
         )
-    
+
     # Fallback lat/lon for non-PostGIS setups
     latitude: Mapped[float] = mapped_column(Float, nullable=False, index=True)
     longitude: Mapped[float] = mapped_column(Float, nullable=False, index=True)
@@ -64,7 +64,7 @@ class CachedLocation(Base):
     )  # 'ERA5-Land' | 'CAMS'
 
     # Country detected from coordinates
-    country_code: Mapped[Optional[str]] = mapped_column(String(3), nullable=True)
+    country_code: Mapped[str | None] = mapped_column(String(3), nullable=True)
 
     # Cache validity period (in days)
     cache_ttl_days: Mapped[int] = mapped_column(default=30)
@@ -86,7 +86,7 @@ class CachedLocation(Base):
 class SolarAnalysis(Base):
     """
     Individual solar analysis request/result.
-    
+
     Stores the user's input parameters and the calculated results
     along with AI-generated insights.
     """
@@ -97,28 +97,28 @@ class SolarAnalysis(Base):
     latitude: Mapped[float] = mapped_column(Float, nullable=False)
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
     area_m2: Mapped[float] = mapped_column(Float, nullable=False)
-    tilt: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    orientation: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
+    tilt: Mapped[float | None] = mapped_column(Float, nullable=True)
+    orientation: Mapped[str | None] = mapped_column(String(5), nullable=True)
 
     # Calculated results
     annual_generation_kwh: Mapped[float] = mapped_column(Float, nullable=True)
-    monthly_breakdown: Mapped[Optional[dict[str, float]]] = mapped_column(
+    monthly_breakdown: Mapped[dict[str, float] | None] = mapped_column(
         JSONB,
         nullable=True,
     )
-    peak_month: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
-    worst_month: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    peak_month: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    worst_month: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     # Data quality
     data_tier: Mapped[str] = mapped_column(String(20), default="standard")
     confidence_score: Mapped[float] = mapped_column(Float, default=0.8)
 
     # AI-generated insights
-    ai_insights: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    ai_insights: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
 
     # Country and regulatory info
-    country_code: Mapped[Optional[str]] = mapped_column(String(3), nullable=True)
-    applied_plugin: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    country_code: Mapped[str | None] = mapped_column(String(3), nullable=True)
+    applied_plugin: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Request tracking
     request_id: Mapped[str] = mapped_column(
@@ -133,8 +133,8 @@ class SolarAnalysis(Base):
     )  # 'pending' | 'processing' | 'complete' | 'error'
 
     # API key that made the request (for tracking)
-    api_key_id: Mapped[Optional[int]] = mapped_column(nullable=True)
+    api_key_id: Mapped[int | None] = mapped_column(nullable=True)
 
     # Error information if status is 'error'
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 

@@ -23,12 +23,18 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    # CORS - Add your Vercel domain after deployment
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://*.vercel.app",  # Vercel preview deployments
-    ]
+    # CORS - Can be set as comma-separated string in env vars
+    # Example: CORS_ORIGINS="https://sunny-2.vercel.app,https://*.vercel.app,http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app"
+    
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS_ORIGINS string into list, handling wildcards."""
+        if not self.CORS_ORIGINS:
+            return []
+        # Split by comma and strip whitespace
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        return origins
 
     # Frontend URL (set in production)
     FRONTEND_URL: str = ""

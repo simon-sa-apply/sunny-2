@@ -81,8 +81,9 @@ High-precision solar diagnostics powered by:
 )
 
 # CORS Configuration
-# For production, add your specific Vercel domain via FRONTEND_URL env var
-cors_origins = list(settings.CORS_ORIGINS)
+# CORS_ORIGINS can be set as comma-separated string: "https://domain1.com,https://domain2.com"
+# FRONTEND_URL is automatically added if set
+cors_origins = settings.cors_origins_list.copy()
 if settings.FRONTEND_URL:
     cors_origins.append(settings.FRONTEND_URL)
 

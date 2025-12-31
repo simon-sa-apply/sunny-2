@@ -11,11 +11,26 @@ import { NextRequest, NextResponse } from "next/server";
 const BACKEND_URL = 
   process.env.NEXT_PUBLIC_API_URL || 
   process.env.BACKEND_URL || 
-  "http://localhost:8000";
+  (process.env.NODE_ENV === "development" ? "http://localhost:8000" : null);
 
 export async function POST(request: NextRequest) {
+  // Validate backend URL is configured in production
+  if (!BACKEND_URL) {
+    console.error("BACKEND_URL or NEXT_PUBLIC_API_URL environment variable is not set!");
+    console.error("Available env vars:", Object.keys(process.env).filter(k => k.includes("BACKEND") || k.includes("API")));
+    return NextResponse.json(
+      { 
+        error: "Backend URL not configured. Please set BACKEND_URL or NEXT_PUBLIC_API_URL environment variable.",
+        details: "This is a configuration error. Contact the administrator."
+      },
+      { status: 500 }
+    );
+  }
+
   try {
     const body = await request.json();
+
+    console.log(`[Estimate API] Calling backend at: ${BACKEND_URL}/api/v1/estimate`);
 
     // Create AbortController for custom timeout (60 seconds)
     const controller = new AbortController();
@@ -52,8 +67,15 @@ export async function POST(request: NextRequest) {
     }
 
     console.error("Estimate API error:", error);
+    console.error(`Backend URL used: ${BACKEND_URL}`);
+    console.error(`Error details:`, error instanceof Error ? error.message : String(error));
+    
     return NextResponse.json(
-      { error: "Error connecting to backend" },
+      { 
+        error: "Error connecting to backend",
+        details: error instanceof Error ? error.message : String(error),
+        backend_url: BACKEND_URL
+      },
       { status: 502 }
     );
   }

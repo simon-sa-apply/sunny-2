@@ -7,21 +7,47 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-// Use NEXT_PUBLIC_API_URL from vercel.json or BACKEND_URL, fallback to localhost for dev
-const BACKEND_URL = 
-  process.env.NEXT_PUBLIC_API_URL || 
-  process.env.BACKEND_URL || 
-  (process.env.NODE_ENV === "development" ? "http://localhost:8000" : null);
+function getBackendUrl(): string {
+  // In Next.js API routes, read env vars at runtime, not module level
+  // Priority: NEXT_PUBLIC_API_URL > BACKEND_URL > localhost (dev only)
+  const url = 
+    process.env.NEXT_PUBLIC_API_URL || 
+    process.env.BACKEND_URL;
+  
+  if (url) {
+    return url;
+  }
+  
+  // Only allow localhost in development
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:8000";
+  }
+  
+  // Production without URL configured - this should not happen
+  throw new Error("BACKEND_URL or NEXT_PUBLIC_API_URL must be configured in production");
+}
 
 export async function POST(request: NextRequest) {
-  // Validate backend URL is configured in production
-  if (!BACKEND_URL) {
-    console.error("BACKEND_URL or NEXT_PUBLIC_API_URL environment variable is not set!");
-    console.error("Available env vars:", Object.keys(process.env).filter(k => k.includes("BACKEND") || k.includes("API")));
+  let backendUrl: string;
+  
+  try {
+    backendUrl = getBackendUrl();
+  } catch (error) {
+    console.error("❌ Backend URL configuration error:");
+    console.error("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL || "NOT SET");
+    console.error("BACKEND_URL:", process.env.BACKEND_URL || "NOT SET");
+    console.error("NODE_ENV:", process.env.NODE_ENV);
+    console.error("All env vars with 'BACKEND' or 'API':", 
+      Object.keys(process.env)
+        .filter(k => k.includes("BACKEND") || k.includes("API"))
+        .map(k => `${k}=${process.env[k]?.substring(0, 20)}...`)
+    );
+    
     return NextResponse.json(
       { 
-        error: "Backend URL not configured. Please set BACKEND_URL or NEXT_PUBLIC_API_URL environment variable.",
-        details: "This is a configuration error. Contact the administrator."
+        error: "Backend URL not configured",
+        message: "Please set BACKEND_URL or NEXT_PUBLIC_API_URL environment variable in Vercel.",
+        details: error instanceof Error ? error.message : String(error)
       },
       { status: 500 }
     );
@@ -30,13 +56,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    console.log(`[Estimate API] Calling backend at: ${BACKEND_URL}/api/v1/estimate`);
+    console.log(`[Estimate API] Calling backend at: ${backendUrl}/api/v1/estimate`);
 
     // Create AbortController for custom timeout (60 seconds)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-    const response = await fetch(`${BACKEND_URL}/api/v1/estimate`, {
+    const response = await fetch(`${backendUrl}/api/v1/estimate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -66,15 +92,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Estimate API error:", error);
-    console.error(`Backend URL used: ${BACKEND_URL}`);
+    console.error("❌ Estimate API error:", error);
+    console.error(`Backend URL used: ${backendUrl}`);
     console.error(`Error details:`, error instanceof Error ? error.message : String(error));
+    console.error(`Environment check - NEXT_PUBLIC_API_URL: ${process.env.NEXT_PUBLIC_API_URL || "NOT SET"}`);
+    console.error(`Environment check - BACKEND_URL: ${process.env.BACKEND_URL || "NOT SET"}`);
     
     return NextResponse.json(
       { 
         error: "Error connecting to backend",
         details: error instanceof Error ? error.message : String(error),
-        backend_url: BACKEND_URL
+        backend_url: backendUrl,
+        hint: "Check that BACKEND_URL is configured in Vercel environment variables"
       },
       { status: 502 }
     );

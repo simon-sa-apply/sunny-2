@@ -10,11 +10,21 @@ import { NextRequest, NextResponse } from "next/server";
 function getBackendUrl(): string {
   // In Next.js API routes, read env vars at runtime, not module level
   // Priority: NEXT_PUBLIC_API_URL > BACKEND_URL > localhost (dev only)
-  const url = 
-    process.env.NEXT_PUBLIC_API_URL || 
-    process.env.BACKEND_URL;
   
+  // Get URL from environment variables
+  let url = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL;
+  
+  // Remove any whitespace and trailing slashes
   if (url) {
+    url = url.trim().replace(/\/+$/, "");
+  }
+  
+  // Validate URL format
+  if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+    // Don't allow localhost in production
+    if (process.env.NODE_ENV === "production" && url.includes("localhost")) {
+      throw new Error("localhost is not allowed in production. Please configure BACKEND_URL in Vercel.");
+    }
     return url;
   }
   

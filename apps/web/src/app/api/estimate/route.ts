@@ -9,10 +9,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 function getBackendUrl(): string {
   // In Next.js API routes, read env vars at runtime, not module level
-  // Priority: NEXT_PUBLIC_API_URL > BACKEND_URL > localhost (dev only)
+  // Priority: BACKEND_URL > NEXT_PUBLIC_API_URL > localhost (dev only)
+  // BACKEND_URL is a server-side variable, more reliable than NEXT_PUBLIC_API_URL
   
-  // Get URL from environment variables
-  let url = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL;
+  // Get URL from environment variables (BACKEND_URL first, as it's server-side)
+  let url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
+  
+  // Handle case where vercel.json generates literal "${BACKEND_URL}" string
+  if (url === "${BACKEND_URL}" || url === "${BACKEND_URL}/") {
+    url = undefined; // Treat as not set
+  }
   
   // Remove any whitespace and trailing slashes
   if (url) {
@@ -34,7 +40,7 @@ function getBackendUrl(): string {
   }
   
   // Production without URL configured - this should not happen
-  throw new Error("BACKEND_URL or NEXT_PUBLIC_API_URL must be configured in production");
+  throw new Error("BACKEND_URL must be configured in Vercel environment variables");
 }
 
 export async function POST(request: NextRequest) {

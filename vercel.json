@@ -21,14 +21,6 @@
       "destination": "${BACKEND_URL}/api/:path*"
     }
   ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "${BACKEND_URL}"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_API_URL": "${BACKEND_URL}"
-    }
-  },
   "crons": [
     {
       "path": "/api/cron/cleanup",

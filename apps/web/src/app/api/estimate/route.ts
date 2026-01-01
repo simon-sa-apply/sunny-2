@@ -9,14 +9,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 function getBackendUrl(): string {
   // In Next.js API routes, read env vars at runtime, not module level
-  // Priority: BACKEND_URL > NEXT_PUBLIC_API_URL > localhost (dev only)
-  // BACKEND_URL is a server-side variable, more reliable than NEXT_PUBLIC_API_URL
+  // Priority: BACKEND_URL > NEXT_PUBLIC_API_URL > hardcoded production URL > localhost (dev only)
   
   // Get URL from environment variables (BACKEND_URL first, as it's server-side)
   let url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
   
   // Handle case where vercel.json generates literal "${BACKEND_URL}" string
-  if (url === "${BACKEND_URL}" || url === "${BACKEND_URL}/") {
+  if (url === "${BACKEND_URL}" || url === "${BACKEND_URL}/" || url?.includes("${")) {
     url = undefined; // Treat as not set
   }
   
@@ -29,9 +28,21 @@ function getBackendUrl(): string {
   if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
     // Don't allow localhost in production
     if (process.env.NODE_ENV === "production" && url.includes("localhost")) {
-      throw new Error("localhost is not allowed in production. Please configure BACKEND_URL in Vercel.");
+      console.error("❌ localhost detected in production! Using fallback URL.");
+      // Fall through to use production fallback
+    } else {
+      return url;
     }
-    return url;
+  }
+  
+  // Production fallback - use hardcoded URL if env vars are not available
+  // This ensures the app works even if env vars are misconfigured
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    const fallbackUrl = "https://sunny-2-api.railway.app";
+    console.warn(`⚠️ Using fallback backend URL: ${fallbackUrl}`);
+    console.warn(`BACKEND_URL: ${process.env.BACKEND_URL || "NOT SET"}`);
+    console.warn(`NEXT_PUBLIC_API_URL: ${process.env.NEXT_PUBLIC_API_URL || "NOT SET"}`);
+    return fallbackUrl;
   }
   
   // Only allow localhost in development
@@ -39,8 +50,8 @@ function getBackendUrl(): string {
     return "http://localhost:8000";
   }
   
-  // Production without URL configured - this should not happen
-  throw new Error("BACKEND_URL must be configured in Vercel environment variables");
+  // Final fallback
+  return "https://sunny-2-api.railway.app";
 }
 
 export async function POST(request: NextRequest) {

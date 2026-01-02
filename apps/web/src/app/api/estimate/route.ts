@@ -7,51 +7,36 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
+// Production backend URL - hardcoded to ensure it always works
+const PRODUCTION_BACKEND_URL = "https://sunny-2-api.railway.app";
+
 function getBackendUrl(): string {
-  // In Next.js API routes, read env vars at runtime, not module level
-  // Priority: BACKEND_URL > NEXT_PUBLIC_API_URL > hardcoded production URL > localhost (dev only)
-  
-  // Get URL from environment variables (BACKEND_URL first, as it's server-side)
-  let url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
-  
-  // Handle case where vercel.json generates literal "${BACKEND_URL}" string
-  if (url === "${BACKEND_URL}" || url === "${BACKEND_URL}/" || url?.includes("${")) {
-    url = undefined; // Treat as not set
-  }
-  
-  // Remove any whitespace and trailing slashes
-  if (url) {
-    url = url.trim().replace(/\/+$/, "");
-  }
-  
-  // Validate URL format
-  if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
-    // Don't allow localhost in production
-    if (process.env.NODE_ENV === "production" && url.includes("localhost")) {
-      console.error("❌ localhost detected in production! Using fallback URL.");
-      // Fall through to use production fallback
-    } else {
-      return url;
-    }
-  }
-  
-  // Production fallback - use hardcoded URL if env vars are not available
+  // CRITICAL: In Vercel production, always use hardcoded URL
   // This ensures the app works even if env vars are misconfigured
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
-    const fallbackUrl = "https://sunny-2-api.railway.app";
-    console.warn(`⚠️ Using fallback backend URL: ${fallbackUrl}`);
-    console.warn(`BACKEND_URL: ${process.env.BACKEND_URL || "NOT SET"}`);
-    console.warn(`NEXT_PUBLIC_API_URL: ${process.env.NEXT_PUBLIC_API_URL || "NOT SET"}`);
-    return fallbackUrl;
+  if (process.env.VERCEL || process.env.NEXT_PUBLIC_VERCEL_ENV) {
+    console.log(`[Backend URL] Vercel detected, using: ${PRODUCTION_BACKEND_URL}`);
+    return PRODUCTION_BACKEND_URL;
   }
   
-  // Only allow localhost in development
+  // Production environment (non-Vercel)
+  if (process.env.NODE_ENV === "production") {
+    // Try env vars first, but fallback to hardcoded
+    const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
+    if (url && url.startsWith("https://") && !url.includes("localhost")) {
+      return url.trim().replace(/\/+$/, "");
+    }
+    console.log(`[Backend URL] Production fallback: ${PRODUCTION_BACKEND_URL}`);
+    return PRODUCTION_BACKEND_URL;
+  }
+  
+  // Development - use localhost
   if (process.env.NODE_ENV === "development") {
-    return "http://localhost:8000";
+    return process.env.BACKEND_URL || "http://localhost:8000";
   }
   
-  // Final fallback
-  return "https://sunny-2-api.railway.app";
+  // Final fallback - always production URL
+  console.log(`[Backend URL] Final fallback: ${PRODUCTION_BACKEND_URL}`);
+  return PRODUCTION_BACKEND_URL;
 }
 
 export async function POST(request: NextRequest) {

@@ -20,11 +20,6 @@ interface AIInsightsProps {
   dataTier: string;
   confidenceScore: number;
   appliedPlugin?: string;
-  savings?: {
-    annual_savings: number;
-    currency_symbol: string;
-    co2_savings_kg: number;
-  };
 }
 
 // Icons for different insight types
@@ -64,7 +59,6 @@ export function AIInsights({
   dataTier,
   confidenceScore,
   appliedPlugin,
-  savings,
 }: AIInsightsProps) {
   const t = useTranslations("aiInsights");
 
@@ -164,32 +158,6 @@ export function AIInsights({
           <p className="text-gray-700 dark:text-gray-300 text-xs md:text-sm">
             {displayInsights.recommendations}
           </p>
-        </div>
-      )}
-
-      {/* Savings & CO2 */}
-      {savings && (
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
-          <div className="p-3 md:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <h4 className="font-semibold text-green-800 dark:text-green-300 mb-1 text-xs md:text-sm">
-              💰 {t("savings")}
-            </h4>
-            <p className="text-lg md:text-2xl font-bold text-green-600">
-              {savings.currency_symbol}
-              {savings.annual_savings.toLocaleString()}
-              <span className="text-xs md:text-lg font-normal ml-1">USD</span>
-            </p>
-            <p className="text-[10px] md:text-sm text-gray-500">{t("perYear")}</p>
-          </div>
-          <div className="p-3 md:p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-            <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-1 text-xs md:text-sm">
-              🌍 CO₂
-            </h4>
-            <p className="text-lg md:text-2xl font-bold text-emerald-600">
-              {savings.co2_savings_kg.toLocaleString()} kg
-            </p>
-            <p className="text-[10px] md:text-sm text-gray-500">{t("co2")}</p>
-          </div>
         </div>
       )}
 

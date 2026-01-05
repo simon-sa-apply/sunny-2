@@ -162,9 +162,12 @@ sunny-2/
 │           ├── app/         # App Router
 │           └── components/  # React components
 │
-├── _bmad/                   # Documentación del proyecto
+├── Documentación/            # Documentación técnica y guías
+├── _bmad/                   # Framework BMAD
 └── _bmad-output/            # Artifacts generados
 ```
+
+> 📚 **Documentación completa:** Ver [Documentación/README.md](./Documentación/README.md) para guías de despliegue, configuración y troubleshooting.
 
 ---
 

@@ -178,7 +178,7 @@ class CopernicusService:
             year = datetime.now().year - 1  # Use previous full year
 
         if not self.is_configured:
-            logger.warning("Copernicus API not configured, using mock data")
+            logger.info("Copernicus API not configured, using mock data for development")
             metrics.record_external_call("copernicus_mock", True, 0)
             return self._generate_mock_data(lat, lon, year)
 
@@ -232,7 +232,8 @@ class CopernicusService:
         Uses cdsapi library for real API calls, falls back to mock data on error.
         """
         # For MVP without real credentials, return mock data
-        if not self._api_key or self._api_key == "mock":
+        if not self._api_key or self._api_key == "mock" or not self._api_secret:
+            logger.info("Copernicus credentials not configured, using mock data")
             await asyncio.sleep(0.5)  # Simulate API latency
             return self._generate_mock_csv(params)
 

@@ -464,7 +464,6 @@ export function Dashboard() {
                         dataTier={result.data_tier}
                         confidenceScore={result.confidence_score}
                         appliedPlugin={result.applied_plugin}
-                        savings={result.savings}
                       />
                     </div>
                   </motion.div>
